@@ -7,6 +7,9 @@ import net.kaaass.se.tasker.util.DateToLongSerializer;
 
 import java.util.Date;
 
+/**
+ * 鉴权令牌数据传送对象
+ */
 @Data
 @AllArgsConstructor
 public class AuthTokenDto {

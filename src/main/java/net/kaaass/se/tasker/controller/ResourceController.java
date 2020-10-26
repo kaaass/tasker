@@ -51,7 +51,7 @@ public class ResourceController extends BaseController {
             throw new BadRequestException("资源类型不存在！");
         }
         return resourceService.createByUrl(url, resourceType, getUid())
-                .map(resourceMapper::resourceDtoToVo).orElseThrow();
+                .map(resourceMapper::dtoToVo).orElseThrow();
     }
 
     @PutMapping("/image/")
@@ -71,7 +71,7 @@ public class ResourceController extends BaseController {
 
         var url = Constants.UPLOAD_BASE + Constants.IMAGE_PATH + newFileName;
         return resourceService.createByUrl(url, ResourceType.IMAGE, getUid())
-                .map(resourceMapper::resourceDtoToVo).orElseThrow();
+                .map(resourceMapper::dtoToVo).orElseThrow();
     }
 
     @PutMapping("/document/")
@@ -91,6 +91,6 @@ public class ResourceController extends BaseController {
 
         var url = Constants.UPLOAD_BASE + Constants.DOCUMENT_PATH + newFileName;
         return resourceService.createByUrl(url, ResourceType.DOCUMENT, getUid())
-                .map(resourceMapper::resourceDtoToVo).orElseThrow();
+                .map(resourceMapper::dtoToVo).orElseThrow();
     }
 }

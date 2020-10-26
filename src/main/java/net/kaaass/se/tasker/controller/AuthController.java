@@ -15,6 +15,9 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
 
+/**
+ * 鉴权相关接口
+ */
 @RestController
 @RequestMapping("/auth")
 public class AuthController extends BaseController {

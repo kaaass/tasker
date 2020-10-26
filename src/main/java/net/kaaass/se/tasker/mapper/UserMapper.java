@@ -7,12 +7,14 @@ import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
 import org.mapstruct.Named;
 
+/**
+ * 用户相关数据结构映射器
+ */
 @Mapper(componentModel = "spring", uses = {UserTransform.class})
 public interface UserMapper {
 
     UserVo userAuthDtoToVo(UserAuthDto authDto);
 
-    @Named("userAuthEntityToDto")
     @Mapping(source = "roles", target = "roles", qualifiedByName = "mapRoles")
     UserAuthDto userAuthEntityToDto(UserAuthEntity authEntity);
 }

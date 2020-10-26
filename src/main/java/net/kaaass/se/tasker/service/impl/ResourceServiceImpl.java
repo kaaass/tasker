@@ -49,7 +49,7 @@ public class ResourceServiceImpl implements ResourceService {
         entity.setUploader(uploader);
         try {
             var result = resourceRepository.save(entity);
-            return Optional.ofNullable(resourceMapper.resourceEntityToDto(result));
+            return Optional.ofNullable(resourceMapper.entityToDto(result));
         } catch (IllegalArgumentException e) {
             log.error("插入资源失败", e);
         } catch (DataIntegrityViolationException e) {
@@ -60,14 +60,14 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Optional<ResourceDto> getResource(String rid) {
-        return getEntity(rid).map(resourceMapper::resourceEntityToDto);
+        return getEntity(rid).map(resourceMapper::entityToDto);
     }
 
     @Override
     public List<ResourceDto> getAllResources(Pageable page) {
         return resourceRepository.findAllByOrderByUploadTimeDesc(page)
                 .stream()
-                .map(resourceMapper::resourceEntityToDto)
+                .map(resourceMapper::entityToDto)
                 .collect(Collectors.toList());
     }
 }

@@ -8,7 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
-import java.util.List;
+import java.util.Set;
 
 /**
  * 用户鉴权对象表
@@ -59,5 +59,15 @@ public class UserAuthEntity {
     @OneToMany(mappedBy = "uploader",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
-    private List<ResourceEntity> resources;
+    private Set<ResourceEntity> resources;
+
+    @OneToOne(mappedBy = "user",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private EmployeeEntity employee;
+
+    @OneToOne(mappedBy = "user",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private ManagerEntity manager;
 }
