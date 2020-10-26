@@ -2,7 +2,6 @@ package net.kaaass.se.tasker.dao.entity;
 
 import lombok.Data;
 import net.kaaass.se.tasker.util.Constants;
-import net.kaaass.se.tasker.util.ResourceType;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;
 import org.hibernate.annotations.GenericGenerator;

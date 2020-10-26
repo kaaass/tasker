@@ -6,7 +6,7 @@ import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.ResourceMapper;
 import net.kaaass.se.tasker.service.ResourceService;
 import net.kaaass.se.tasker.util.Constants;
-import net.kaaass.se.tasker.util.ResourceType;
+import net.kaaass.se.tasker.dao.entity.ResourceType;
 import net.kaaass.se.tasker.util.StringUtils;
 import net.kaaass.se.tasker.vo.ResourceVo;
 import org.springframework.beans.factory.annotation.Autowired;
