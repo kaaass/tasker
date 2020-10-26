@@ -1,6 +1,7 @@
 package net.kaaass.se.tasker.controller.request;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import org.springframework.lang.NonNull;
 
 /**

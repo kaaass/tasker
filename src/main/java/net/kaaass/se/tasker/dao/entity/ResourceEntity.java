@@ -25,7 +25,7 @@ public class ResourceEntity {
     @Column(name = "url", unique = true)
     private String url;
 
-    @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    @ManyToOne
     @JoinColumn(name = "uploader_uid")
     private UserAuthEntity uploader;
 

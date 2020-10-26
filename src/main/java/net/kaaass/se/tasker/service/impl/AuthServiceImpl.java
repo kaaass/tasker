@@ -137,7 +137,6 @@ public class AuthServiceImpl implements AuthService {
     public void remove(String id) throws NotFoundException {
         var entity = authRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("未找到该用户！"));
-        // TODO 删除对应职工信息，或者可以用级联删除，或者直接转移到 EmployeeService
         authRepository.delete(entity);
     }
 

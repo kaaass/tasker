@@ -8,6 +8,7 @@ import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * 用户鉴权对象表
@@ -50,4 +51,13 @@ public class UserAuthEntity {
     @Column(name = "last_login_time",
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp lastLoginTime;
+
+    /*
+     * 外键相关
+     */
+
+    @OneToMany(mappedBy = "uploader",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private List<ResourceEntity> resources;
 }

@@ -4,6 +4,7 @@ import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
 import net.kaaass.se.tasker.controller.response.LoginResponse;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.vo.UserVo;
@@ -48,5 +49,11 @@ public class AuthController extends BaseController {
         return authService.register(addedUser)
                 .map(userMapper::userAuthDtoToVo)
                 .orElseThrow(() -> new BadRequestException("该用户名已被注册！"));
+    }
+
+    @DeleteMapping("/{uid}")
+    @PreAuthorize("hasRole('ADMIN')")
+    public void deleteUser(@PathVariable String uid) throws NotFoundException {
+        authService.remove(uid);
     }
 }
