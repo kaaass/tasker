@@ -2,6 +2,7 @@ package net.kaaass.se.tasker.service;
 
 import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
 import net.kaaass.se.tasker.controller.response.LoginResponse;
+import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.dto.UserAuthDto;
 import net.kaaass.se.tasker.exception.NotFoundException;
@@ -26,6 +27,11 @@ public interface AuthService {
      * 从 uid 获得用户数据
      */
     Optional<UserAuthDto> getByUid(String uid);
+
+    /**
+     * 从 uid 获得用户实体
+     */
+    Optional<UserAuthEntity> getEntity(String uid);
 
     /**
      * 令牌刷新

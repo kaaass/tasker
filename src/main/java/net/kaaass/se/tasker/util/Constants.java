@@ -19,4 +19,8 @@ public class Constants {
     public static final String ROLE_ADMIN = "ROLE_ADMIN";
 
     public static final String SCRIPT_TYPE_JAVASCRIPT = "javascript";
+    
+    public static final String IMAGE_PATH = "image/";
+    public static final String UPLOAD_BASE = "/upload/";
+    public static final String DOCUMENT_PATH = "document/";
 }

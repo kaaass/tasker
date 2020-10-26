@@ -122,6 +122,11 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Optional<UserAuthEntity> getEntity(String uid) {
+        return authRepository.findById(uid);
+    }
+
+    @Override
     public Optional<AuthTokenDto> refresh(String oldToken) {
         return Optional.of(oldToken)
                 .filter(this::validateTokenViaDatabase)
