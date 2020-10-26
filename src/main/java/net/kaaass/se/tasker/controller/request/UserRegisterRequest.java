@@ -17,5 +17,8 @@ public class UserRegisterRequest {
     private String password;
 
     @NonNull
+    private String type;
+
+    @NonNull
     private String name;
 }

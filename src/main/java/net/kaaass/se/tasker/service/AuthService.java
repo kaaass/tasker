@@ -5,6 +5,7 @@ import net.kaaass.se.tasker.controller.response.LoginResponse;
 import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.dto.UserAuthDto;
+import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 
 import java.util.Optional;
@@ -16,7 +17,7 @@ public interface AuthService {
     /**
      * 用户注册
      */
-    Optional<UserAuthDto> register(UserRegisterRequest userToAdd);
+    Optional<UserAuthDto> register(UserRegisterRequest userToAdd) throws BadRequestException;
 
     /**
      * 用户登录

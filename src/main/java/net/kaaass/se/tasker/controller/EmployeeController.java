@@ -1,14 +1,21 @@
 package net.kaaass.se.tasker.controller;
 
 import net.kaaass.se.tasker.controller.request.EmployeeRequest;
+import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.mapper.EmployeeMapper;
 import net.kaaass.se.tasker.security.Role;
+import net.kaaass.se.tasker.service.EmployeeService;
 import net.kaaass.se.tasker.vo.DelegateVo;
 import net.kaaass.se.tasker.vo.EmployeeVo;
 import net.kaaass.se.tasker.vo.TaskVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 员工操作相关接口
@@ -17,14 +24,21 @@ import java.util.List;
 @RequestMapping("/employee")
 public class EmployeeController extends BaseController {
 
+    @Autowired
+    private EmployeeService service;
+
+    @Autowired
+    private EmployeeMapper mapper;
+
     /**
      * 显示所有员工信息
      */
     @GetMapping("/list")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
-    public List<EmployeeVo> listEmployee() {
-        // TODO
-        return null;
+    public List<EmployeeVo> listEmployee(Pageable pageable) {
+        return service.getAllEmployee(pageable).stream()
+                .map(mapper::dtoToVo)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -34,9 +48,8 @@ public class EmployeeController extends BaseController {
     @Secured({Role.ADMIN, Role.EMPLOYEE})
     public EmployeeVo updateEmployee(
             @PathVariable String eid,
-            @RequestBody EmployeeRequest request) {
-        // TODO
-        return null;
+            @RequestBody EmployeeRequest request) throws BadRequestException, NotFoundException {
+        return mapper.dtoToVo(service.update(eid, request));
     }
 
     /**
@@ -64,9 +77,10 @@ public class EmployeeController extends BaseController {
      */
     @PostMapping("/add")
     @Secured({Role.ADMIN})
-    public EmployeeVo addEmployee(@RequestBody EmployeeRequest request) {
-        // TODO
-        return null;
+    public EmployeeVo addEmployee(@RequestBody EmployeeRequest request) throws BadRequestException, NotFoundException {
+        if (request.getUid() == null)
+            throw new BadRequestException("必须提供员工uid");
+        return mapper.dtoToVo(service.add(request));
     }
 
     /**
@@ -74,8 +88,9 @@ public class EmployeeController extends BaseController {
      */
     @GetMapping("/info")
     @Secured({Role.EMPLOYEE})
-    public EmployeeVo info() {
-        // TODO
-        return null;
+    public EmployeeVo info() throws NotFoundException {
+        return service.getByUid(getUid())
+                .map(mapper::dtoToVo)
+                .orElseThrow(() -> new NotFoundException("当前用户的员工信息不存在！"));
     }
 }

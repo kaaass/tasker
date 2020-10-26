@@ -2,18 +2,22 @@ package net.kaaass.se.tasker.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.TaskerApplication;
+import net.kaaass.se.tasker.controller.request.EmployeeRequest;
 import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
 import net.kaaass.se.tasker.controller.response.LoginResponse;
 import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
 import net.kaaass.se.tasker.dao.repository.UserAuthRepository;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
+import net.kaaass.se.tasker.dto.EmployeeType;
 import net.kaaass.se.tasker.dto.UserAuthDto;
 import net.kaaass.se.tasker.event.UserRegisterEvent;
+import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.AuthService;
+import net.kaaass.se.tasker.service.EmployeeService;
 import net.kaaass.se.tasker.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -28,6 +32,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
@@ -58,19 +63,33 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserMapper userMapper;
 
+    @Autowired
+    private EmployeeService employeeService;
+
     @Override
-    public Optional<UserAuthDto> register(UserRegisterRequest userToAdd) {
+    @Transactional
+    public Optional<UserAuthDto> register(UserRegisterRequest userToAdd) throws BadRequestException {
         // 登录信息
         var authEntity = new UserAuthEntity();
         authEntity.setUsername(userToAdd.getUsername());
         authEntity.setPassword(jwtTokenUtil.encryptPassword(userToAdd.getPassword()));
-        authEntity.setRoles(Role.USER);
+        authEntity.setRoles(Role.EMPLOYEE);
         try {
             authEntity = authRepository.save(authEntity);
         } catch (Exception e) {
             return Optional.empty();
         }
-        // TODO 注册增加职工信息，使用参数 name，或者直接转移到 EmployeeService::register
+        // 增加职工信息
+        var request = new EmployeeRequest();
+        request.setName(userToAdd.getName());
+        request.setType(userToAdd.getType());
+        request.setUid(authEntity.getId());
+        try {
+            employeeService.add(request);
+        } catch (NotFoundException e) {
+            log.error("非预期注册错误发生", e);
+            return Optional.empty();
+        }
         // 拼接结果
         var result = userMapper.userAuthEntityToDto(authEntity);
         // 触发事件

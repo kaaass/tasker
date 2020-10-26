@@ -20,7 +20,9 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-@EnableGlobalMethodSecurity(prePostEnabled = true)
+@EnableGlobalMethodSecurity(prePostEnabled = true,
+        securedEnabled = true,
+        jsr250Enabled = true)
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Qualifier("jwtUserDetailsServiceImpl")
@@ -37,6 +39,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     /**
      * 加载BCrypt密码编码器
+     *
      * @return BCrypt密码编码器
      */
     @Bean
@@ -77,8 +80,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 鉴权接口匿名访问
                 .antMatchers("/auth/**").permitAll();
 
-                // 其余鉴权
-                // .anyRequest().authenticated();
+        // 其余鉴权
+        // .anyRequest().authenticated();
 
         // 禁用缓存
         httpSecurity.headers().cacheControl();

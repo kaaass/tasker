@@ -33,6 +33,7 @@ public class TestAuthService {
         var request = new UserRegisterRequest(
                 "kas",
                 "123123",
+                "A",
                 "KAs"
         );
 
@@ -55,6 +56,7 @@ public class TestAuthService {
         var request = new UserRegisterRequest(
                 "kas",
                 "123123",
+                "A",
                 "KAs"
         );
         var user = authService.register(request).orElseThrow();
