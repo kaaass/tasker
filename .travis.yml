@@ -14,4 +14,4 @@ before_install:
   - sudo mysql -e 'create database tasker;'
   - cp src/main/resources/application.yml.sample src/main/resources/application.yml
 script:
-  - ./mvnw clean install -B
+  - ./mvnw test -f pom.xml
