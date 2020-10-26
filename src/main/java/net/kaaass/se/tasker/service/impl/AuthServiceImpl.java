@@ -1,12 +1,14 @@
 package net.kaaass.se.tasker.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import net.kaaass.se.tasker.TaskerApplication;
 import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
 import net.kaaass.se.tasker.controller.response.LoginResponse;
 import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
 import net.kaaass.se.tasker.dao.repository.UserAuthRepository;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.dto.UserAuthDto;
+import net.kaaass.se.tasker.event.UserRegisterEvent;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
@@ -70,8 +72,8 @@ public class AuthServiceImpl implements AuthService {
         // TODO 注册增加职工信息，使用参数 name，或者直接转移到 EmployeeService::register
         // 拼接结果
         var result = userMapper.userAuthEntityToDto(authEntity);
-        // TODO 触发事件
-//        KmallApplication.EVENT_BUS.post(new UserRegisterEvent(result));
+        // 触发事件
+        TaskerApplication.EVENT_BUS.post(new UserRegisterEvent(result));
         return Optional.of(result);
     }
 
