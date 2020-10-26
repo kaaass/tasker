@@ -8,6 +8,7 @@ import net.kaaass.se.tasker.dao.repository.UserAuthRepository;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.dto.UserAuthDto;
 import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
 import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.util.Constants;
@@ -31,6 +32,9 @@ import java.util.Optional;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
+/**
+ * 用户鉴权相关服务的具体实现
+ */
 @Service
 @Slf4j
 public class AuthServiceImpl implements AuthService {
@@ -48,24 +52,24 @@ public class AuthServiceImpl implements AuthService {
     @Autowired
     private UserAuthRepository authRepository;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @Override
     public Optional<UserAuthDto> register(UserRegisterRequest userToAdd) {
         // 登录信息
         var authEntity = new UserAuthEntity();
         authEntity.setUsername(userToAdd.getUsername());
         authEntity.setPassword(jwtTokenUtil.encryptPassword(userToAdd.getPassword()));
-        authEntity.setRoles(Constants.ROLE_EMPLOYEE);
+        authEntity.setRoles(Constants.ROLE_USER);
         try {
             authEntity = authRepository.save(authEntity);
         } catch (Exception e) {
             return Optional.empty();
         }
-        // TODO 注册增加职工信息，使用参数 name
+        // TODO 注册增加职工信息，使用参数 name，或者直接转移到 EmployeeService::register
         // 拼接结果
-        var result = new UserAuthDto();
-        result.setId(authEntity.getId());
-        result.setUsername(authEntity.getUsername());
-        // TODO 漏了 roles 的映射，应该通过 UserMapper 实现
+        var result = userMapper.userAuthEntityToDto(authEntity);
         // TODO 触发事件
 //        KmallApplication.EVENT_BUS.post(new UserRegisterEvent(result));
         return Optional.of(result);
@@ -79,10 +83,10 @@ public class AuthServiceImpl implements AuthService {
                     .orElseThrow();
             var upToken = new UsernamePasswordAuthenticationToken(uid, password);
             // 登录验证
-            Authentication auth = authenticationManager.authenticate(upToken);
+            var auth = authenticationManager.authenticate(upToken);
             SecurityContextHolder.getContext().setAuthentication(auth);
 
-            UserDetails userDetails = (UserDetails) auth.getPrincipal();
+            var userDetails = (UserDetails) auth.getPrincipal();
             // 更新时间
             authRepository.findById(uid)
                     .ifPresent(userAuthEntity -> {
@@ -110,6 +114,12 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public Optional<UserAuthDto> getByUid(String uid) {
+        return authRepository.findById(uid)
+                .map(userMapper::userAuthEntityToDto);
+    }
+
+    @Override
     public Optional<AuthTokenDto> refresh(String oldToken) {
         return Optional.of(oldToken)
                 .filter(this::validateTokenViaDatabase)
@@ -120,7 +130,7 @@ public class AuthServiceImpl implements AuthService {
     public void remove(String id) throws NotFoundException {
         var entity = authRepository.findById(id)
                     .orElseThrow(() -> new NotFoundException("未找到该用户！"));
-        // TODO 删除对应职工信息，或者可以用级联删除
+        // TODO 删除对应职工信息，或者可以用级联删除，或者直接转移到 EmployeeService
         authRepository.delete(entity);
     }
 

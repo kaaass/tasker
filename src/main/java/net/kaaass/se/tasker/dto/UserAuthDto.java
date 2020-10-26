@@ -4,6 +4,9 @@ import lombok.Data;
 
 import java.util.List;
 
+/**
+ * 用户登录数据传输对象
+ */
 @Data
 public class UserAuthDto {
 
@@ -14,4 +17,6 @@ public class UserAuthDto {
     private String password;
 
     private List<String> roles;
+
+    boolean enable = true;
 }

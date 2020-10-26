@@ -23,6 +23,9 @@ public class AuthController extends BaseController {
     @Autowired
     private AuthService authService;
 
+    @Autowired
+    private UserMapper userMapper;
+
     @PostMapping("/login")
     public LoginResponse createAuthenticationToken(
             @RequestParam String username, @RequestParam String password) throws BadRequestException {
@@ -41,9 +44,9 @@ public class AuthController extends BaseController {
 
     @PostMapping("/register")
     public UserVo register(@RequestBody UserRegisterRequest addedUser) throws BadRequestException {
-        // TODO 检查输入，重复
+        // TODO 检查输入
         return authService.register(addedUser)
-                .map(UserMapper.INSTANCE::userAuthDtoToVo)
+                .map(userMapper::userAuthDtoToVo)
                 .orElseThrow(() -> new BadRequestException("该用户名已被注册！"));
     }
 }

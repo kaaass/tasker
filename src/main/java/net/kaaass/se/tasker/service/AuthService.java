@@ -23,6 +23,11 @@ public interface AuthService {
     Optional<LoginResponse> login(String username, String password);
 
     /**
+     * 从 uid 获得用户数据
+     */
+    Optional<UserAuthDto> getByUid(String uid);
+
+    /**
      * 令牌刷新
      */
     Optional<AuthTokenDto> refresh(String oldToken);

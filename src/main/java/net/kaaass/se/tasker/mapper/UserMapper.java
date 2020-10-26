@@ -4,11 +4,22 @@ import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
 import net.kaaass.se.tasker.dto.UserAuthDto;
 import net.kaaass.se.tasker.vo.UserVo;
 import org.mapstruct.Mapper;
-import org.mapstruct.factory.Mappers;
+import org.mapstruct.Mapping;
+import org.mapstruct.Named;
 
-@Mapper
+import java.util.Arrays;
+import java.util.List;
+
+@Mapper(componentModel = "spring")
 public interface UserMapper {
-    UserMapper INSTANCE = Mappers.getMapper( UserMapper.class );
 
     UserVo userAuthDtoToVo(UserAuthDto authDto);
+
+    @Mapping(source = "roles", target = "roles", qualifiedByName = "mapRoles")
+    UserAuthDto userAuthEntityToDto(UserAuthEntity authEntity);
+
+    @Named("mapRoles")
+    default List<String> mapRoles(String roles) {
+        return Arrays.asList(roles.split(","));
+    }
 }
