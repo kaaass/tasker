@@ -1,7 +1,6 @@
 package net.kaaass.se.tasker.dto;
 
 import lombok.Data;
-import net.kaaass.se.tasker.dao.entity.EmployeeType;
 
 /**
  * 员工数据传输对象

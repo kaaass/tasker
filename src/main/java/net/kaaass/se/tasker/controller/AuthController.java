@@ -30,6 +30,9 @@ public class AuthController extends BaseController {
     @Autowired
     private UserMapper userMapper;
 
+    /**
+     * 登录并获取用户鉴权令牌
+     */
     @PostMapping("/login")
     public LoginResponse createAuthenticationToken(
             @RequestParam String username, @RequestParam String password) throws BadRequestException {
@@ -38,6 +41,9 @@ public class AuthController extends BaseController {
                 .orElseThrow(() -> new BadRequestException("用户名或密码错误！"));
     }
 
+    /**
+     * 刷新当前用户的鉴权令牌
+     */
     @GetMapping("/refresh")
     @PreAuthorize("authenticated")
     public AuthTokenDto refreshAndGetAuthenticationToken(HttpServletRequest request) throws BadRequestException {
@@ -46,6 +52,9 @@ public class AuthController extends BaseController {
                 .orElseThrow(() -> new BadRequestException("该Token无效！"));
     }
 
+    /**
+     * 用于员工的注册
+     */
     @PostMapping("/register")
     public UserVo register(@RequestBody UserRegisterRequest addedUser) throws BadRequestException {
         // TODO 检查输入
@@ -54,6 +63,9 @@ public class AuthController extends BaseController {
                 .orElseThrow(() -> new BadRequestException("该用户名已被注册！"));
     }
 
+    /**
+     * 管理员删除员工
+     */
     @DeleteMapping("/{uid}")
     @PreAuthorize("hasRole('ADMIN')")
     public void deleteUser(@PathVariable String uid) throws NotFoundException {

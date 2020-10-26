@@ -1,4 +1,4 @@
-package net.kaaass.se.tasker.dao.entity;
+package net.kaaass.se.tasker.dto;
 
 /**
  * 员工类别

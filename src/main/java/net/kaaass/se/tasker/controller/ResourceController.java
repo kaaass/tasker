@@ -6,7 +6,7 @@ import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.ResourceMapper;
 import net.kaaass.se.tasker.service.ResourceService;
 import net.kaaass.se.tasker.util.Constants;
-import net.kaaass.se.tasker.dao.entity.ResourceType;
+import net.kaaass.se.tasker.dto.ResourceType;
 import net.kaaass.se.tasker.util.StringUtils;
 import net.kaaass.se.tasker.vo.ResourceVo;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,7 +54,7 @@ public class ResourceController extends BaseController {
                 .map(resourceMapper::dtoToVo).orElseThrow();
     }
 
-    @PutMapping("/image/")
+    @PutMapping("/image")
     @PreAuthorize("authenticated")
     public ResourceVo uploadImage(@RequestParam MultipartFile file) throws BadRequestException, IOException, NotFoundException {
         if (file.isEmpty()) {
@@ -74,7 +74,7 @@ public class ResourceController extends BaseController {
                 .map(resourceMapper::dtoToVo).orElseThrow();
     }
 
-    @PutMapping("/document/")
+    @PutMapping("/document")
     @PreAuthorize("authenticated")
     public ResourceVo uploadDocument(@RequestParam MultipartFile file) throws BadRequestException, IOException, NotFoundException {
         if (file.isEmpty()) {

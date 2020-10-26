@@ -1,7 +1,7 @@
 package net.kaaass.se.tasker.controller.request;
 
 import lombok.Data;
-import net.kaaass.se.tasker.dao.entity.EmployeeType;
+import net.kaaass.se.tasker.dto.EmployeeType;
 import org.springframework.lang.NonNull;
 
 /**
@@ -14,5 +14,5 @@ public class EmployeeRequest {
     String name;
 
     @NonNull
-    EmployeeType type;
+    String type;
 }

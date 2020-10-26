@@ -1,4 +1,4 @@
-package net.kaaass.se.tasker.dao.entity;
+package net.kaaass.se.tasker.dto;
 
 /**
  * 资源类型

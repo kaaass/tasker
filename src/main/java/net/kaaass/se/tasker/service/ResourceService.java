@@ -4,7 +4,7 @@ import net.kaaass.se.tasker.dao.entity.ResourceEntity;
 import net.kaaass.se.tasker.dto.ResourceDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
-import net.kaaass.se.tasker.dao.entity.ResourceType;
+import net.kaaass.se.tasker.dto.ResourceType;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

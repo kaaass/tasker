@@ -1,7 +1,7 @@
 package net.kaaass.se.tasker.vo;
 
 import lombok.Data;
-import net.kaaass.se.tasker.dao.entity.EmployeeType;
+import net.kaaass.se.tasker.dto.EmployeeType;
 
 /**
  * 员工视图对象

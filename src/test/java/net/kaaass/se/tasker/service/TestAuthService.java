@@ -4,6 +4,7 @@ import lombok.SneakyThrows;
 import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
 import net.kaaass.se.tasker.dto.UserAuthDto;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
+import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.util.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -63,7 +64,7 @@ public class TestAuthService {
         assertTrue(logged.isPresent());
         var response = logged.get();
         assertEquals("kas", response.getUsername());
-        assertEquals(List.of(Constants.ROLE_USER), response.getRoles());
+        assertEquals(List.of(Role.USER), response.getRoles());
         // end
         authService.remove(user.getId());
     }

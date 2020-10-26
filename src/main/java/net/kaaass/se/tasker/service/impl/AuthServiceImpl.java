@@ -12,6 +12,7 @@ import net.kaaass.se.tasker.event.UserRegisterEvent;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
+import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.util.Constants;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,7 +64,7 @@ public class AuthServiceImpl implements AuthService {
         var authEntity = new UserAuthEntity();
         authEntity.setUsername(userToAdd.getUsername());
         authEntity.setPassword(jwtTokenUtil.encryptPassword(userToAdd.getPassword()));
-        authEntity.setRoles(Constants.ROLE_USER);
+        authEntity.setRoles(Role.USER);
         try {
             authEntity = authRepository.save(authEntity);
         } catch (Exception e) {

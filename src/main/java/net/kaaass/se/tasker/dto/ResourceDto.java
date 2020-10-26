@@ -3,7 +3,6 @@ package net.kaaass.se.tasker.dto;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
 import net.kaaass.se.tasker.util.DateToLongSerializer;
-import net.kaaass.se.tasker.dao.entity.ResourceType;
 
 import java.util.Date;
 

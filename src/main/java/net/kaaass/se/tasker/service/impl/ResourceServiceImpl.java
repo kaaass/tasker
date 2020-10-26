@@ -9,7 +9,7 @@ import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.ResourceMapper;
 import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.service.ResourceService;
-import net.kaaass.se.tasker.dao.entity.ResourceType;
+import net.kaaass.se.tasker.dto.ResourceType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
