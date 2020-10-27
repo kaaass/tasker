@@ -9,10 +9,14 @@ import net.kaaass.se.tasker.dao.repository.UserAuthRepository;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.dto.UserDto;
 import net.kaaass.se.tasker.event.UserRegisterEvent;
+import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.ServiceUnavailableException;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
-import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.AuthService;
+import net.kaaass.se.tasker.service.EmployeeService;
+import net.kaaass.se.tasker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -51,22 +55,40 @@ public class AuthServiceImpl implements AuthService {
     private UserAuthRepository repository;
 
     @Autowired
-    private UserMapper userMapper;
+    private UserMapper mapper;
+
+    @Autowired
+    private UserService userService;
+
+    @Autowired
+    private EmployeeService employeeService;
 
     @Override
-    public Optional<UserDto> register(UserRegisterRequest userToAdd) {
-        // 登录信息
-        var authEntity = new UserEntity();
-        authEntity.setUsername(userToAdd.getUsername());
-        authEntity.setPassword(jwtTokenUtil.encryptPassword(userToAdd.getPassword()));
-        authEntity.setRoles(Role.USER);
+    public Optional<UserDto> register(UserRegisterRequest userToAdd) throws BadRequestException {
+        // 账户注册
+        UserDto result;
         try {
-            authEntity = repository.saveAndFlush(authEntity);
+            var request = mapper.mapUserRequest(userToAdd);
+            result = userService.add(request).orElseThrow();
         } catch (Exception e) {
             return Optional.empty();
         }
-        // 拼接结果
-        var result = userMapper.entityToDto(authEntity);
+        // 员工信息注册
+        try {
+            var request = mapper.mapEmployeeRequest(userToAdd);
+            request.setUid(result.getId());
+            result = employeeService.add(request).getUser();
+        } catch (NotFoundException e) {
+            log.error("注册过程发生异常", e);
+            return Optional.empty();
+        } catch (BadRequestException e) {
+            // TODO 更改为事务
+            try {
+                userService.remove(result.getId());
+            } catch (NotFoundException ignore) {
+            }
+            throw e;
+        }
         // 触发事件
         TaskerApplication.EVENT_BUS.post(new UserRegisterEvent(result));
         return Optional.of(result);

@@ -13,7 +13,7 @@ import java.util.Optional;
  */
 public interface AuthService {
     /**
-     * 用户注册
+     * 员工的注册
      */
     Optional<UserDto> register(UserRegisterRequest userToAdd) throws BadRequestException;
 

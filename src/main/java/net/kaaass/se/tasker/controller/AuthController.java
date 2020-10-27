@@ -63,19 +63,10 @@ public class AuthController extends BaseController {
      * 用于员工的注册
      */
     @PostMapping("/register")
-    public UserVo register(@RequestBody UserRegisterRequest addedUser) throws BadRequestException, ServiceUnavailableException {
+    public UserVo register(@RequestBody UserRegisterRequest addedUser) throws BadRequestException {
         // 用户注册
         var user = service.register(addedUser)
                 .orElseThrow(() -> new BadRequestException("该用户名已被注册！"));
-        // 增加员工信息
-        try {
-            var request = mapper.mapRegisterRequest(addedUser);
-            request.setUid(user.getId());
-            user = employeeService.add(request).getUser();
-        } catch (NotFoundException e) {
-            log.error("注册过程发生异常", e);
-            throw new ServiceUnavailableException("注册失败，请稍后再试！");
-        }
         return mapper.dtoToVo(user);
     }
 }
