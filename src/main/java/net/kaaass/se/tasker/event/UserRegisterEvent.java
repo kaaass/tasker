@@ -4,7 +4,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.ToString;
-import net.kaaass.se.tasker.dto.UserAuthDto;
+import net.kaaass.se.tasker.dto.UserDto;
 import net.kaaass.se.tasker.eventhandle.Event;
 
 /**
@@ -18,5 +18,5 @@ import net.kaaass.se.tasker.eventhandle.Event;
 @ToString
 public class UserRegisterEvent extends Event {
 
-    UserAuthDto userAuth;
+    UserDto userAuth;
 }

@@ -18,7 +18,7 @@ import java.util.Set;
 @Data
 @Table(name = "user_auth")
 @EqualsAndHashCode(of = "id")
-public class UserAuthEntity {
+public class UserEntity {
     @Id
     @GenericGenerator(name = Constants.ID_GENERATOR, strategy = Constants.UUID)
     @GeneratedValue(generator = Constants.ID_GENERATOR)

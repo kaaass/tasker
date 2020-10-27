@@ -14,7 +14,7 @@ public class EmployeeDto {
 
     private EmployeeType type;
 
-    private UserAuthDto user;
+    private UserDto user;
 
     private ManagerDto manager;
 }

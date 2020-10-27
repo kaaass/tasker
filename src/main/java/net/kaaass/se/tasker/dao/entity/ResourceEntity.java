@@ -29,7 +29,7 @@ public class ResourceEntity {
 
     @ManyToOne
     @JoinColumn(name = "uploader_uid")
-    private UserAuthEntity uploader;
+    private UserEntity uploader;
 
     @Column(name = "upload_time",
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")

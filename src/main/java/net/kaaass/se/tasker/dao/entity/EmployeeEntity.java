@@ -31,7 +31,7 @@ public class EmployeeEntity {
 
     @OneToOne
     @JoinColumn(name = "uid", unique = true)
-    private UserAuthEntity user;
+    private UserEntity user;
 
     @ManyToOne
     @JoinColumn(name = "manager_id")

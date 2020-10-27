@@ -28,7 +28,7 @@ public class ManagerEntity {
 
     @OneToOne
     @JoinColumn(name = "uid", unique = true)
-    private UserAuthEntity user;
+    private UserEntity user;
 
     @OneToMany(mappedBy = "manager",
             fetch = FetchType.LAZY,

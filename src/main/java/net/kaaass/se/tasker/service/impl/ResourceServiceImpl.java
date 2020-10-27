@@ -4,12 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.dao.entity.ResourceEntity;
 import net.kaaass.se.tasker.dao.repository.ResourceRepository;
 import net.kaaass.se.tasker.dto.ResourceDto;
+import net.kaaass.se.tasker.dto.ResourceType;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.mapper.ResourceMapper;
-import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.service.ResourceService;
-import net.kaaass.se.tasker.dto.ResourceType;
+import net.kaaass.se.tasker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Pageable;
@@ -33,7 +33,7 @@ public class ResourceServiceImpl implements ResourceService {
     private ResourceMapper resourceMapper;
 
     @Autowired
-    private AuthService authService;
+    private UserService userService;
 
     public Optional<ResourceEntity> getEntity(String rid) {
         return resourceRepository.findById(rid);
@@ -42,7 +42,7 @@ public class ResourceServiceImpl implements ResourceService {
     @Override
     public Optional<ResourceDto> createByUrl(String url, ResourceType type, String uid) throws NotFoundException, BadRequestException {
         var entity = new ResourceEntity();
-        var uploader = authService.getEntity(uid)
+        var uploader = userService.getEntity(uid)
                 .orElseThrow(() -> new NotFoundException("用户不存在！"));
         entity.setType(type);
         entity.setUrl(url);

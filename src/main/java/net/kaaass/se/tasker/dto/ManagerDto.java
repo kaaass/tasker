@@ -12,5 +12,5 @@ public class ManagerDto {
 
     private String name;
 
-    private UserAuthDto user;
+    private UserDto user;
 }

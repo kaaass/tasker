@@ -2,12 +2,9 @@ package net.kaaass.se.tasker.service;
 
 import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
 import net.kaaass.se.tasker.controller.response.LoginResponse;
-import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
-import net.kaaass.se.tasker.dto.UserAuthDto;
+import net.kaaass.se.tasker.dto.UserDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
-import net.kaaass.se.tasker.exception.NotFoundException;
-import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 
 import java.util.Optional;
 
@@ -18,7 +15,7 @@ public interface AuthService {
     /**
      * 用户注册
      */
-    Optional<UserAuthDto> register(UserRegisterRequest userToAdd) throws BadRequestException;
+    Optional<UserDto> register(UserRegisterRequest userToAdd) throws BadRequestException;
 
     /**
      * 用户登录
@@ -26,34 +23,7 @@ public interface AuthService {
     Optional<LoginResponse> login(String username, String password);
 
     /**
-     * 从 uid 获得用户数据
-     */
-    Optional<UserAuthDto> getByUid(String uid);
-
-    /**
-     * 从 uid 获得用户实体
-     */
-    Optional<UserAuthEntity> getEntity(String uid);
-
-    /**
      * 令牌刷新
      */
     Optional<AuthTokenDto> refresh(String oldToken);
-
-    /**
-     * 删除用户
-     */
-    void remove(String id) throws NotFoundException;
-
-    /**
-     * 用户赋权
-     * @return
-     */
-    UserAuthDto grant(String uid, String role) throws UserNotFoundException;
-
-    /**
-     * 取消用户赋权
-     * @return
-     */
-    UserAuthDto revoke(String uid, String role) throws UserNotFoundException;
 }

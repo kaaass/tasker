@@ -13,6 +13,7 @@ import net.kaaass.se.tasker.mapper.EmployeeMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.service.EmployeeService;
+import net.kaaass.se.tasker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
@@ -35,7 +36,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     private EmployeeMapper mapper;
 
     @Autowired
-    private AuthService authService;
+    private UserService userService;
 
     @Override
     public List<EmployeeDto> getAllEmployee(Pageable pageable) {
@@ -55,7 +56,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto add(EmployeeRequest request) throws BadRequestException, NotFoundException {
         var entity = new EmployeeEntity();
-        authService.grant(request.getUid(), Role.EMPLOYEE);
+        userService.grant(request.getUid(), Role.EMPLOYEE);
         return saveBaseOnEntity(request, entity);
     }
 
@@ -65,7 +66,7 @@ public class EmployeeServiceImpl implements EmployeeService {
         entity.setName(request.getName());
         entity.setType(type);
         if (request.getUid() != null)
-            entity.setUser(authService.getEntity(request.getUid())
+            entity.setUser(userService.getEntity(request.getUid())
                     .orElseThrow(UserNotFoundException::new));
         EmployeeEntity result;
         try {

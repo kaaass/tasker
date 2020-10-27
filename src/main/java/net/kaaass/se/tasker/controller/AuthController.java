@@ -17,7 +17,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
-import javax.transaction.Transactional;
 
 /**
  * 鉴权相关接口
@@ -77,17 +76,6 @@ public class AuthController extends BaseController {
             log.error("注册过程发生异常", e);
             throw new ServiceUnavailableException("注册失败，请稍后再试！");
         }
-        return mapper.userAuthDtoToVo(user);
-    }
-
-    /**
-     * 管理员删除员工
-     */
-    @DeleteMapping("/{uid}")
-    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteUser(@PathVariable String uid) throws NotFoundException, BadRequestException {
-        if (uid.equals(getUid()))
-            throw new BadRequestException("不能删除当前账户！");
-        service.remove(uid);
+        return mapper.dtoToVo(user);
     }
 }

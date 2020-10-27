@@ -1,30 +1,25 @@
 package net.kaaass.se.tasker.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
-import net.kaaass.se.tasker.controller.request.EmployeeRequest;
 import net.kaaass.se.tasker.controller.request.ManagerRequest;
-import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
 import net.kaaass.se.tasker.dao.entity.ManagerEntity;
 import net.kaaass.se.tasker.dao.repository.ManagerRepository;
 import net.kaaass.se.tasker.dto.EmployeeDto;
-import net.kaaass.se.tasker.dto.EmployeeType;
 import net.kaaass.se.tasker.dto.ManagerDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
-import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.EmployeeMapper;
 import net.kaaass.se.tasker.mapper.ManagerMapper;
 import net.kaaass.se.tasker.security.Role;
-import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.service.EmployeeService;
 import net.kaaass.se.tasker.service.ManagerService;
+import net.kaaass.se.tasker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -50,7 +45,7 @@ public class ManagerServiceImpl implements ManagerService {
     private EmployeeMapper employeeMapper;
 
     @Autowired
-    private AuthService authService;
+    private UserService userService;
 
     @Override
     public Optional<EmployeeDto> addToGroup(String mid, String eid)
@@ -109,14 +104,14 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public ManagerDto add(ManagerRequest request) throws UserNotFoundException, BadRequestException {
-        authService.grant(request.getUid(), Role.MANAGER);
+        userService.grant(request.getUid(), Role.MANAGER);
         return saveBaseOnEntity(request, new ManagerEntity());
     }
 
     private ManagerDto saveBaseOnEntity(ManagerRequest request, ManagerEntity entity) throws UserNotFoundException, BadRequestException {
         entity.setName(request.getName());
         if (request.getUid() != null)
-            entity.setUser(authService.getEntity(request.getUid())
+            entity.setUser(userService.getEntity(request.getUid())
                     .orElseThrow(UserNotFoundException::new));
         ManagerEntity result;
         try {

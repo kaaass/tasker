@@ -1,6 +1,6 @@
 package net.kaaass.se.tasker.security;
 
-import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
+import net.kaaass.se.tasker.dao.entity.UserEntity;
 import org.springframework.security.core.authority.AuthorityUtils;
 
 /**
@@ -10,7 +10,7 @@ public class JwtUserFactory {
     private JwtUserFactory() {
     }
 
-    public static JwtUser create(UserAuthEntity authEntity) {
+    public static JwtUser create(UserEntity authEntity) {
         return new JwtUser(
                 authEntity.getId(),
                 authEntity.getPassword(),

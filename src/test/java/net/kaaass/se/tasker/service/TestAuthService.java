@@ -2,10 +2,8 @@ package net.kaaass.se.tasker.service;
 
 import lombok.SneakyThrows;
 import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
-import net.kaaass.se.tasker.dto.UserAuthDto;
-import net.kaaass.se.tasker.security.JwtTokenUtil;
+import net.kaaass.se.tasker.dto.UserDto;
 import net.kaaass.se.tasker.security.Role;
-import net.kaaass.se.tasker.util.Constants;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +23,9 @@ public class TestAuthService {
     private AuthService authService;
 
     @Autowired
+    private UserService userService;
+
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @SneakyThrows
@@ -37,16 +38,16 @@ public class TestAuthService {
                 "KAs"
         );
 
-        UserAuthDto result = authService.register(request).orElseThrow();
+        UserDto result = authService.register(request).orElseThrow();
 
-        var query = authService.getByUid(result.getId()).orElseThrow();
+        var query = userService.getByUid(result.getId()).orElseThrow();
         assertEquals("kas", query.getUsername());
         assertNotEquals("123123", query.getPassword()); // 密码不是明文存储
         assertTrue(passwordEncoder.matches("123123", query.getPassword()));
 
-        authService.remove(result.getId());
+        userService.remove(result.getId());
 
-        var empty = authService.getByUid(result.getId());
+        var empty = userService.getByUid(result.getId());
         assertTrue(empty.isEmpty());
     }
 
@@ -68,6 +69,6 @@ public class TestAuthService {
         assertEquals("kas", response.getUsername());
         assertEquals(List.of(Role.USER), response.getRoles());
         // end
-        authService.remove(user.getId());
+        userService.remove(user.getId());
     }
 }
