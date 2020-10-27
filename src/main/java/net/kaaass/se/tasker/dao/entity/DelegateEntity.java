@@ -36,6 +36,9 @@ public class DelegateEntity {
     @JoinColumn(name = "delegate_to_eid")
     private EmployeeEntity delegateTo;
 
+    @Column(name = "expire_time")
+    private Timestamp expire;
+
     @Column(name = "create_time",
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     @Generated(GenerationTime.INSERT)

@@ -1,4 +1,4 @@
-package net.kaaass.se.tasker.vo;
+package net.kaaass.se.tasker.dto;
 
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import lombok.Data;
@@ -7,18 +7,18 @@ import net.kaaass.se.tasker.util.DateToLongSerializer;
 import java.util.Date;
 
 /**
- * 委托视图对象
+ * 委托数据传输对象
  */
 @Data
-public class DelegateVo {
+public class DelegateDto {
 
     private String id;
 
-    private TaskVo task;
+    private TaskDto task;
 
-    private EmployeeVo from;
+    private EmployeeDto from;
 
-    private EmployeeVo delegateTo;
+    private EmployeeDto delegateTo;
 
     @JsonSerialize(using = DateToLongSerializer.class)
     private Date expire;
