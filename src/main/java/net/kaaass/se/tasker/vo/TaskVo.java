@@ -32,7 +32,7 @@ public class TaskVo {
      */
     private ResourceVo pending;
 
-    private DelegateVo delegate;
+    private boolean delegate;
 
     private Set<TaskVo> previous;
 

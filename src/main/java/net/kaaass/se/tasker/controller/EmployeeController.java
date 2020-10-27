@@ -3,9 +3,12 @@ package net.kaaass.se.tasker.controller;
 import net.kaaass.se.tasker.controller.request.EmployeeRequest;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.mapper.EmployeeMapper;
+import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.EmployeeService;
+import net.kaaass.se.tasker.service.TaskService;
 import net.kaaass.se.tasker.vo.DelegateVo;
 import net.kaaass.se.tasker.vo.EmployeeVo;
 import net.kaaass.se.tasker.vo.TaskVo;
@@ -31,6 +34,12 @@ public class EmployeeController extends BaseController {
     @Autowired
     private EmployeeMapper mapper;
 
+    @Autowired
+    private TaskService taskService;
+
+    @Autowired
+    private TaskMapper taskMapper;
+
     /**
      * 显示所有员工信息
      */
@@ -50,6 +59,7 @@ public class EmployeeController extends BaseController {
     public EmployeeVo updateEmployee(
             @PathVariable String eid,
             @RequestBody EmployeeRequest request) throws BadRequestException, NotFoundException {
+        // FIXME 员工类型改变，对应的任务是不是也要改变？
         return mapper.dtoToVo(service.update(eid, request));
     }
 
@@ -58,9 +68,10 @@ public class EmployeeController extends BaseController {
      */
     @GetMapping("/{eid}/delegate")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
-    public List<DelegateVo> listDelegate(@PathVariable String eid) {
-        // TODO
-        return null;
+    public List<DelegateVo> listDelegate(@PathVariable String eid) throws EmployeeNotFoundException {
+        return taskService.listDelegateForEmployee(eid).stream()
+                .map(taskMapper::dtoToVo)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -68,9 +79,10 @@ public class EmployeeController extends BaseController {
      */
     @GetMapping("/{eid}/task")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
-    public List<TaskVo> listTask(@PathVariable String eid) {
-        // TODO
-        return null;
+    public List<TaskVo> listTask(@PathVariable String eid) throws EmployeeNotFoundException {
+        return taskService.listTaskForEmployee(eid).stream()
+                .map(taskMapper::dtoToVo)
+                .collect(Collectors.toList());
     }
 
     /**

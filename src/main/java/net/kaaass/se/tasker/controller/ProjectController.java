@@ -108,7 +108,6 @@ public class ProjectController extends BaseController {
     @PostMapping("/generate")
     @Secured({Role.MANAGER})
     public ProjectVo generateProject(GenerateProjectRequest request) {
-        // TODO
         int randCount = 0;
         int rest = request.getTotal();
         var taskCounts = request.getTaskCounts();
@@ -155,7 +154,7 @@ public class ProjectController extends BaseController {
     public ProjectInfoResponse projectInfo(@PathVariable String pid)
             throws ProjectNotFoundException, ForbiddenException, ManagerNotFoundException, EmployeeNotFoundException {
         // 检查查看权限
-        service.checkViewProjectPermit(pid, getUserDto());
+        service.checkViewPermit(pid, getUserDto());
         // 查询
         var response = new ProjectInfoResponse();
         response.setInfo(service.getByPid(pid)

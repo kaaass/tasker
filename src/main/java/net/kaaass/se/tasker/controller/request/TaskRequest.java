@@ -1,6 +1,8 @@
 package net.kaaass.se.tasker.controller.request;
 
 import lombok.Data;
+import org.springframework.lang.NonNull;
+import org.springframework.lang.Nullable;
 
 import java.util.List;
 
@@ -10,15 +12,21 @@ import java.util.List;
 @Data
 public class TaskRequest {
 
+    @Nullable
+    private String id;
+
+    @NonNull
     private List<String> previousId;
 
+    @NonNull
     private String name;
 
+    @NonNull
     private String type;
 
+    @NonNull
     private String undertakerEid;
 
-    private String status;
-
+    @NonNull
     private String projectId;
 }

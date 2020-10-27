@@ -82,6 +82,7 @@ public class ProjectServiceImpl implements ProjectService {
         var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
         entity.setStatus(ProjectStatus.ACTIVE);
         // 所有 CREATED、INACTIVE 的变成 ACTIVE
+        // TODO 不是所有，是拓扑排序第一次，或者说所有先序结点都完成的
         entity.getTasks().stream()
                 .filter(task -> task.getStatus() == TaskStatus.CREATED ||
                         task.getStatus() == TaskStatus.INACTIVE)
@@ -94,9 +95,10 @@ public class ProjectServiceImpl implements ProjectService {
     public ProjectDto stopProject(String pid) throws ProjectNotFoundException {
         var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
         entity.setStatus(ProjectStatus.ACTIVE);
-        // 所有 ACTIVE 的变成 INACTIVE
+        // 所有 ACTIVE、REJECTED 的变成 INACTIVE
         entity.getTasks().stream()
-                .filter(task -> task.getStatus() == TaskStatus.ACTIVE)
+                .filter(task -> task.getStatus() == TaskStatus.ACTIVE ||
+                        task.getStatus() == TaskStatus.REJECTED)
                 .forEach(task -> task.setStatus(TaskStatus.INACTIVE));
         repository.save(entity);
         return mapper.entityToDto(entity);
@@ -128,7 +130,13 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void checkViewProjectPermit(String pid, UserDto userDto)
+    public ResourceDto getOrCreateProjectDocument(ProjectDto projectDto) {
+        // TODO
+        return null;
+    }
+
+    @Override
+    public void checkViewPermit(String pid, UserDto userDto)
             throws ProjectNotFoundException, ManagerNotFoundException, ForbiddenException, EmployeeNotFoundException {
         var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
         // TODO

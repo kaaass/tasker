@@ -2,6 +2,12 @@ package net.kaaass.se.tasker.dto;
 
 /**
  * 任务状态
+ *
+ *                     INACTIVE <----------------------------------  REJECTED
+ *                        |↑    /project/stop                           ↑ /task/reject
+ *        /project/start  ↓|                                            |
+ * CREATED -----------> ACTIVE -----------> WAIT_COMMIT -----------> WAIT_REVIEW -----------> DONE
+ *                            /task/finish             /task/commit            /task/confirm
  */
 public enum TaskStatus {
 
@@ -24,6 +30,11 @@ public enum TaskStatus {
      * 等待提交
      */
     WAIT_COMMIT,
+
+    /**
+     * 等待检查
+     */
+    WAIT_REVIEW,
 
     /**
      * 完成

@@ -2,13 +2,23 @@ package net.kaaass.se.tasker.controller;
 
 import net.kaaass.se.tasker.controller.request.DelegateRequest;
 import net.kaaass.se.tasker.controller.request.TaskRequest;
+import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
+import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
+import net.kaaass.se.tasker.exception.concrete.TaskNotFoundException;
+import net.kaaass.se.tasker.mapper.ResourceMapper;
+import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
+import net.kaaass.se.tasker.service.TaskService;
 import net.kaaass.se.tasker.vo.DelegateVo;
 import net.kaaass.se.tasker.vo.ResourceVo;
 import net.kaaass.se.tasker.vo.TaskVo;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -16,17 +26,24 @@ import java.util.List;
  */
 @RestController
 @RequestMapping("/task")
-public class TaskController {
+public class TaskController extends BaseController {
+
+    @Autowired
+    private TaskService service;
+
+    @Autowired
+    private TaskMapper mapper;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
 
     /**
-     * 员工将分配给自己的任务委派给他人
+     * 增加任务
      */
-    @PostMapping("/{tid}/delegate")
-    @Secured({Role.EMPLOYEE})
-    public DelegateVo delegateTask(@PathVariable String tid,
-                                   @RequestBody DelegateRequest request) {
-        // TODO
-        return null;
+    @PostMapping("/add")
+    @Secured({Role.ADMIN, Role.MANAGER})
+    public TaskVo addTask(@RequestBody TaskRequest request) throws ProjectNotFoundException, EmployeeNotFoundException, BadRequestException {
+        return mapper.dtoToVo(service.add(request));
     }
 
     /**
@@ -35,10 +52,9 @@ public class TaskController {
     @PostMapping("/{tid}/update")
     @Secured({Role.ADMIN, Role.MANAGER})
     public TaskVo updateTask(@PathVariable String tid,
-                             @RequestBody TaskRequest request) {
-        // TODO
-        // 任务类型改变，分配对象也要随机改变嘛？
-        return null;
+                             @RequestBody TaskRequest request) throws TaskNotFoundException, BadRequestException, EmployeeNotFoundException, ProjectNotFoundException {
+        // FIXME 任务类型改变，分配对象也要随机改变嘛？
+        return mapper.dtoToVo(service.update(tid, request));
     }
 
     /**
@@ -46,19 +62,12 @@ public class TaskController {
      */
     @PostMapping("/update")
     @Secured({Role.ADMIN, Role.MANAGER})
-    public List<TaskVo> updateTaskBatch(@RequestBody List<TaskRequest> request) {
-        // TODO
-        return null;
-    }
-
-    /**
-     * 增加任务
-     */
-    @PostMapping("/add")
-    @Secured({Role.ADMIN, Role.MANAGER})
-    public TaskVo addTask(@RequestBody TaskRequest request) {
-        // TODO
-        return null;
+    public List<TaskVo> updateTaskBatch(@RequestBody List<TaskRequest> requests) throws TaskNotFoundException, BadRequestException, EmployeeNotFoundException, ProjectNotFoundException {
+        var tasks = new ArrayList<TaskVo>();
+        for (var request : requests) {
+            tasks.add(mapper.dtoToVo(service.update(request.getId(), request)));
+        }
+        return tasks;
     }
 
     /**
@@ -66,9 +75,10 @@ public class TaskController {
      */
     @GetMapping("/{tid}/info")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
-    public TaskVo taskInfo(@PathVariable String tid) {
-        // TODO
-        return null;
+    public TaskVo taskInfo(@PathVariable String tid) throws TaskNotFoundException {
+        service.checkViewPermit(tid, getUserDto());
+        return service.getById(tid).map(mapper::dtoToVo)
+                .orElseThrow(TaskNotFoundException::new);
     }
 
     /**
@@ -77,9 +87,8 @@ public class TaskController {
     @PostMapping("/{tid}/commit")
     @Secured({Role.EMPLOYEE})
     public TaskVo commitTask(@PathVariable String tid,
-                             @RequestParam String documentId) {
-        // TODO
-        return null;
+                             @RequestParam String documentId) throws NotFoundException, BadRequestException {
+        return mapper.dtoToVo(service.commitTask(tid, documentId));
     }
 
     /**
@@ -91,9 +100,8 @@ public class TaskController {
      */
     @PostMapping("/{tid}/finish")
     @Secured({Role.EMPLOYEE})
-    public ResourceVo finishTask(@PathVariable String tid) {
-        // TODO
-        return null;
+    public ResourceVo finishTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException {
+        return resourceMapper.dtoToVo(service.finishTask(tid));
     }
 
     /**
@@ -101,9 +109,8 @@ public class TaskController {
      */
     @PostMapping("/{tid}/confirm")
     @Secured({Role.MANAGER})
-    public TaskVo confirmTask(@PathVariable String tid) {
-        // TODO
-        return null;
+    public TaskVo confirmTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException {
+        return mapper.dtoToVo(service.confirmTask(tid));
     }
 
     /**
@@ -111,9 +118,18 @@ public class TaskController {
      */
     @PostMapping("/{tid}/reject")
     @Secured({Role.MANAGER})
-    public TaskVo rejectTask(@PathVariable String tid) {
-        // TODO
-        return null;
+    public TaskVo rejectTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException {
+        return mapper.dtoToVo(service.rejectTask(tid));
+    }
+
+    /**
+     * 员工将分配给自己的任务委派给他人
+     */
+    @PostMapping("/{tid}/delegate")
+    @Secured({Role.EMPLOYEE})
+    public DelegateVo delegateTask(@PathVariable String tid,
+                                   @RequestBody DelegateRequest request) throws EmployeeNotFoundException, TaskNotFoundException {
+        return mapper.dtoToVo(service.addDelegate(tid, request, getUid()));
     }
 
     /**
@@ -121,8 +137,7 @@ public class TaskController {
      */
     @PostMapping("/{tid}/withdraw")
     @Secured({Role.EMPLOYEE})
-    public TaskVo withdrawTask(@PathVariable String tid) {
-        // TODO
-        return null;
+    public TaskVo withdrawDelegate(@PathVariable String tid) throws NotFoundException {
+        return mapper.dtoToVo(service.withdrawDelegate(tid));
     }
 }

@@ -30,7 +30,7 @@ public class TaskDto {
      */
     private ResourceDto pending;
 
-    private DelegateDto delegate;
+    private boolean delegate;
 
     private Set<TaskDto> previous;
 
