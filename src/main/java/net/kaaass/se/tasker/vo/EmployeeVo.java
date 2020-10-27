@@ -1,7 +1,7 @@
 package net.kaaass.se.tasker.vo;
 
 import lombok.Data;
-import net.kaaass.se.tasker.dto.EmployeeType;
+import net.kaaass.se.tasker.dto.TaskType;
 
 /**
  * 员工视图对象
@@ -13,7 +13,7 @@ public class EmployeeVo {
 
     private String name;
 
-    private EmployeeType type;
+    private TaskType type;
 
     private UserVo user;
 

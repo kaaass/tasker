@@ -34,7 +34,7 @@ public class BaseController {
     /**
      * 获得鉴权用户的 auth dto，方法将会请求数据库
      */
-    protected UserDto getAuthDto() {
+    protected UserDto getUserDto() {
         return userService.getByUid(getUid()).orElseThrow();
     }
 }

@@ -2,7 +2,7 @@ package net.kaaass.se.tasker.dao.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import net.kaaass.se.tasker.dto.EmployeeType;
+import net.kaaass.se.tasker.dto.TaskType;
 import net.kaaass.se.tasker.util.Constants;
 import org.hibernate.annotations.GenericGenerator;
 
@@ -28,7 +28,7 @@ public class EmployeeEntity {
     private String name;
 
     @Column(name = "type")
-    private EmployeeType type;
+    private TaskType type;
 
     @OneToOne
     @JoinColumn(name = "uid", unique = true)

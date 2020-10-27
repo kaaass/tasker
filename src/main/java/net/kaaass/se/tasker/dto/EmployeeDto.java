@@ -12,7 +12,7 @@ public class EmployeeDto {
 
     private String name;
 
-    private EmployeeType type;
+    private TaskType type;
 
     private UserDto user;
 

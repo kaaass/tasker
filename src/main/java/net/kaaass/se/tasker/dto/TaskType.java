@@ -5,10 +5,10 @@ import net.kaaass.se.tasker.exception.BadRequestException;
 /**
  * 员工类别
  */
-public enum EmployeeType {
+public enum TaskType {
     A, B, C;
 
-    public static EmployeeType valueOfThrow(String value) throws BadRequestException {
+    public static TaskType valueOfThrow(String value) throws BadRequestException {
         try {
             return valueOf(value);
         } catch (IllegalArgumentException ignore) {

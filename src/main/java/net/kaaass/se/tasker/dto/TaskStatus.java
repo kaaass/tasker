@@ -16,6 +16,11 @@ public enum TaskStatus {
     ACTIVE,
 
     /**
+     * 随项目暂停
+     */
+    INACTIVE,
+
+    /**
      * 等待提交
      */
     WAIT_COMMIT,

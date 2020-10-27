@@ -5,6 +5,7 @@ import lombok.Data;
 import net.kaaass.se.tasker.util.DateToLongSerializer;
 
 import java.util.Date;
+import java.util.Set;
 
 /**
  * 任务数据传输对象
@@ -16,7 +17,7 @@ public class TaskDto {
 
     private String name;
 
-    private EmployeeType type;
+    private TaskType type;
 
     private EmployeeDto undertaker;
 
@@ -27,7 +28,11 @@ public class TaskDto {
     /**
      * 待审核的项目文档
      */
-    private ResourceDto pendding;
+    private ResourceDto pending;
+
+    private DelegateDto delegate;
+
+    private Set<TaskDto> previous;
 
     @JsonSerialize(using = DateToLongSerializer.class)
     private Date createTime;

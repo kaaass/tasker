@@ -2,7 +2,7 @@ package net.kaaass.se.tasker.dao.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import net.kaaass.se.tasker.dto.EmployeeType;
+import net.kaaass.se.tasker.dto.TaskType;
 import net.kaaass.se.tasker.dto.TaskStatus;
 import net.kaaass.se.tasker.util.Constants;
 import org.hibernate.annotations.Generated;
@@ -32,7 +32,7 @@ public class TaskEntity {
     private String name;
 
     @Column(name = "type")
-    private EmployeeType type;
+    private TaskType type;
 
     @ManyToOne
     @JoinColumn(name = "undertaker_mid")
@@ -49,8 +49,8 @@ public class TaskEntity {
      * 待审核的项目文档
      */
     @ManyToOne
-    @JoinColumn(name = "pendding_doc_rid")
-    private ResourceEntity pendding;
+    @JoinColumn(name = "pending_doc_rid")
+    private ResourceEntity pending;
 
     @Column(name = "create_time",
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
