@@ -54,7 +54,7 @@ public class ResourceController extends BaseController {
                 .map(resourceMapper::dtoToVo).orElseThrow();
     }
 
-    @PutMapping("/image")
+    @PostMapping("/image")
     @PreAuthorize("authenticated")
     public ResourceVo uploadImage(@RequestParam MultipartFile file) throws BadRequestException, IOException, NotFoundException {
         if (file.isEmpty()) {
@@ -74,7 +74,7 @@ public class ResourceController extends BaseController {
                 .map(resourceMapper::dtoToVo).orElseThrow();
     }
 
-    @PutMapping("/document")
+    @PostMapping("/document")
     @PreAuthorize("authenticated")
     public ResourceVo uploadDocument(@RequestParam MultipartFile file) throws BadRequestException, IOException, NotFoundException {
         if (file.isEmpty()) {
