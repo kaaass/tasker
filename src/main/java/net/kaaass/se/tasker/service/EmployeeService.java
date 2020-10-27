@@ -2,9 +2,11 @@ package net.kaaass.se.tasker.service;
 
 import net.kaaass.se.tasker.controller.request.EmployeeRequest;
 import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
+import net.kaaass.se.tasker.dao.entity.ManagerEntity;
 import net.kaaass.se.tasker.dto.EmployeeDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;

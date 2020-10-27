@@ -1,29 +1,50 @@
 package net.kaaass.se.tasker.controller;
 
 import net.kaaass.se.tasker.controller.request.ManagerRequest;
+import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
+import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
+import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
+import net.kaaass.se.tasker.mapper.EmployeeMapper;
+import net.kaaass.se.tasker.mapper.ManagerMapper;
 import net.kaaass.se.tasker.security.Role;
+import net.kaaass.se.tasker.service.ManagerService;
 import net.kaaass.se.tasker.vo.EmployeeVo;
 import net.kaaass.se.tasker.vo.ManagerVo;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * 经理操作相关接口
  */
 @RestController
 @RequestMapping("/manager")
-public class ManagerController {
+public class ManagerController extends BaseController {
+
+    @Autowired
+    private ManagerService service;
+
+    @Autowired
+    private ManagerMapper mapper;
+
+    @Autowired
+    private EmployeeMapper employeeMapper;
 
     /**
      * 向经理组内增加员工
      */
     @PostMapping("/{mid}/employee/add")
     @Secured({Role.ADMIN, Role.MANAGER})
-    public EmployeeVo addEmployee(@PathVariable String mid) {
-        // TODO
-        return null;
+    public EmployeeVo addEmployee(@PathVariable String mid,
+                                  @RequestParam String eid) throws EmployeeNotFoundException, ManagerNotFoundException {
+        return service.addToGroup(mid, eid)
+                .map(employeeMapper::dtoToVo)
+                .orElseThrow();
     }
 
     /**
@@ -32,8 +53,8 @@ public class ManagerController {
     @PostMapping("/{mid}/employee/remove")
     @Secured({Role.ADMIN, Role.MANAGER})
     public void removeEmployee(@PathVariable String mid,
-                               @RequestParam String eid) {
-        // TODO
+                               @RequestParam String eid) throws EmployeeNotFoundException, ManagerNotFoundException {
+        service.deleteFromGroup(mid, eid);
     }
 
     /**
@@ -41,19 +62,21 @@ public class ManagerController {
      */
     @GetMapping("/list")
     @Secured({Role.ADMIN})
-    public List<ManagerVo> listManager() {
-        // TODO
-        return null;
+    public List<ManagerVo> listManager(Pageable pageable) {
+        return service.getAll(pageable).stream()
+                .map(mapper::dtoToVo)
+                .collect(Collectors.toList());
     }
 
     /**
-     * 显示所有经理
+     * 显示经理组内的所有员工
      */
     @GetMapping("/{mid}/employee/list")
     @Secured({Role.ADMIN, Role.MANAGER})
     public List<EmployeeVo> listEmployeeOfManager(@PathVariable String mid) {
-        // TODO
-        return null;
+        return service.getGroupMember(mid).stream()
+                .map(employeeMapper::dtoToVo)
+                .collect(Collectors.toList());
     }
 
     /**
@@ -63,9 +86,8 @@ public class ManagerController {
     @Secured({Role.ADMIN, Role.MANAGER})
     public ManagerVo updateManager(
             @PathVariable String mid,
-            @RequestBody ManagerRequest request) {
-        // TODO
-        return null;
+            @RequestBody ManagerRequest request) throws ManagerNotFoundException {
+        return mapper.dtoToVo(service.update(mid, request));
     }
 
     /**
@@ -73,9 +95,10 @@ public class ManagerController {
      */
     @PostMapping("/add")
     @Secured({Role.ADMIN})
-    public ManagerVo addManager(@RequestBody ManagerRequest request) {
-        // TODO
-        return null;
+    public ManagerVo addManager(@RequestBody ManagerRequest request) throws BadRequestException, UserNotFoundException {
+        if (request.getUid() == null)
+            throw new BadRequestException("必须提供经理uid");
+        return mapper.dtoToVo(service.add(request));
     }
 
     /**
@@ -83,8 +106,9 @@ public class ManagerController {
      */
     @GetMapping("/info")
     @Secured({Role.MANAGER})
-    public ManagerVo info() {
-        // TODO
-        return null;
+    public ManagerVo info() throws ManagerNotFoundException {
+        return service.getByUid(getUid())
+                .map(mapper::dtoToVo)
+                .orElseThrow(ManagerNotFoundException::new);
     }
 }

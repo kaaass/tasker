@@ -1,6 +1,7 @@
 package net.kaaass.se.tasker.dao.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import net.kaaass.se.tasker.util.Constants;
 import org.hibernate.annotations.Generated;
 import org.hibernate.annotations.GenerationTime;
@@ -16,6 +17,7 @@ import java.util.Set;
 @Entity
 @Data
 @Table(name = "user_auth")
+@EqualsAndHashCode(of = "id")
 public class UserAuthEntity {
     @Id
     @GenericGenerator(name = Constants.ID_GENERATOR, strategy = Constants.UUID)

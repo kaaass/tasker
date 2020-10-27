@@ -1,6 +1,7 @@
 package net.kaaass.se.tasker.dao.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import net.kaaass.se.tasker.dto.ResourceType;
 import net.kaaass.se.tasker.util.Constants;
 import org.hibernate.annotations.Generated;
@@ -13,6 +14,7 @@ import java.sql.Timestamp;
 @Entity
 @Data
 @Table(name = "resource")
+@EqualsAndHashCode(of = "id")
 public class ResourceEntity {
     @Id
     @GenericGenerator(name = Constants.ID_GENERATOR, strategy = Constants.UUID)

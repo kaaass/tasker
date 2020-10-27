@@ -7,6 +7,7 @@ import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.dto.UserAuthDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 
 import java.util.Optional;
 
@@ -43,4 +44,16 @@ public interface AuthService {
      * 删除用户
      */
     void remove(String id) throws NotFoundException;
+
+    /**
+     * 用户赋权
+     * @return
+     */
+    UserAuthDto grant(String uid, String role) throws UserNotFoundException;
+
+    /**
+     * 取消用户赋权
+     * @return
+     */
+    UserAuthDto revoke(String uid, String role) throws UserNotFoundException;
 }

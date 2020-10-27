@@ -1,6 +1,7 @@
 package net.kaaass.se.tasker.dao.entity;
 
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import net.kaaass.se.tasker.dto.EmployeeType;
 import net.kaaass.se.tasker.util.Constants;
 import org.hibernate.annotations.GenericGenerator;
@@ -13,6 +14,7 @@ import javax.persistence.*;
 @Entity
 @Data
 @Table(name = "employee")
+@EqualsAndHashCode(of = "id")
 public class EmployeeEntity {
 
     @Id

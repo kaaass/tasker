@@ -2,42 +2,39 @@ package net.kaaass.se.tasker.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.TaskerApplication;
-import net.kaaass.se.tasker.controller.request.EmployeeRequest;
 import net.kaaass.se.tasker.controller.request.UserRegisterRequest;
 import net.kaaass.se.tasker.controller.response.LoginResponse;
 import net.kaaass.se.tasker.dao.entity.UserAuthEntity;
 import net.kaaass.se.tasker.dao.repository.UserAuthRepository;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
-import net.kaaass.se.tasker.dto.EmployeeType;
 import net.kaaass.se.tasker.dto.UserAuthDto;
 import net.kaaass.se.tasker.event.UserRegisterEvent;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.service.EmployeeService;
-import net.kaaass.se.tasker.util.Constants;
+import org.hibernate.mapping.Collection;
+import org.mapstruct.ap.internal.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.Arrays;
 import java.util.NoSuchElementException;
 import java.util.Optional;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 /**
@@ -58,7 +55,7 @@ public class AuthServiceImpl implements AuthService {
     private JwtTokenUtil jwtTokenUtil;
 
     @Autowired
-    private UserAuthRepository authRepository;
+    private UserAuthRepository repository;
 
     @Autowired
     private UserMapper userMapper;
@@ -67,27 +64,15 @@ public class AuthServiceImpl implements AuthService {
     private EmployeeService employeeService;
 
     @Override
-    @Transactional
-    public Optional<UserAuthDto> register(UserRegisterRequest userToAdd) throws BadRequestException {
+    public Optional<UserAuthDto> register(UserRegisterRequest userToAdd) {
         // 登录信息
         var authEntity = new UserAuthEntity();
         authEntity.setUsername(userToAdd.getUsername());
         authEntity.setPassword(jwtTokenUtil.encryptPassword(userToAdd.getPassword()));
-        authEntity.setRoles(Role.EMPLOYEE);
+        authEntity.setRoles(Role.USER);
         try {
-            authEntity = authRepository.save(authEntity);
+            authEntity = repository.saveAndFlush(authEntity);
         } catch (Exception e) {
-            return Optional.empty();
-        }
-        // 增加职工信息
-        var request = new EmployeeRequest();
-        request.setName(userToAdd.getName());
-        request.setType(userToAdd.getType());
-        request.setUid(authEntity.getId());
-        try {
-            employeeService.add(request);
-        } catch (NotFoundException e) {
-            log.error("非预期注册错误发生", e);
             return Optional.empty();
         }
         // 拼接结果
@@ -100,7 +85,7 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public Optional<LoginResponse> login(String username, String password) {
         try {
-            var uid = authRepository.findByUsername(username)
+            var uid = repository.findByUsername(username)
                     .map(UserAuthEntity::getId)
                     .orElseThrow();
             var upToken = new UsernamePasswordAuthenticationToken(uid, password);
@@ -110,10 +95,10 @@ public class AuthServiceImpl implements AuthService {
 
             var userDetails = (UserDetails) auth.getPrincipal();
             // 更新时间
-            authRepository.findById(uid)
+            repository.findById(uid)
                     .ifPresent(userAuthEntity -> {
                         userAuthEntity.setLastLoginTime(Timestamp.valueOf(LocalDateTime.now()));
-                        authRepository.save(userAuthEntity);
+                        repository.save(userAuthEntity);
                     });
 
             // 拼接凭据
@@ -137,13 +122,13 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public Optional<UserAuthDto> getByUid(String uid) {
-        return authRepository.findById(uid)
+        return repository.findById(uid)
                 .map(userMapper::userAuthEntityToDto);
     }
 
     @Override
     public Optional<UserAuthEntity> getEntity(String uid) {
-        return authRepository.findById(uid);
+        return repository.findById(uid);
     }
 
     @Override
@@ -155,9 +140,29 @@ public class AuthServiceImpl implements AuthService {
 
     @Override
     public void remove(String id) throws NotFoundException {
-        var entity = authRepository.findById(id)
+        var entity = repository.findById(id)
                     .orElseThrow(() -> new NotFoundException("未找到该用户！"));
-        authRepository.delete(entity);
+        repository.delete(entity);
+    }
+
+    @Override
+    public UserAuthDto grant(String uid, String role) throws UserNotFoundException {
+        var entity = getEntity(uid).orElseThrow(UserNotFoundException::new);
+        var roles = Collections.asSet(entity.getRoles().split(","));
+        roles.add(role);
+        entity.setRoles(String.join(",", roles));
+        repository.save(entity);
+        return userMapper.userAuthEntityToDto(entity);
+    }
+
+    @Override
+    public UserAuthDto revoke(String uid, String role) throws UserNotFoundException {
+        var entity = getEntity(uid).orElseThrow(UserNotFoundException::new);
+        var roles = Collections.asSet(entity.getRoles().split(","));
+        roles.remove(role);
+        entity.setRoles(String.join(",", roles));
+        repository.save(entity);
+        return userMapper.userAuthEntityToDto(entity);
     }
 
     private boolean validateTokenViaDatabase(String oldToken) {

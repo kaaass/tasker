@@ -8,7 +8,9 @@ import net.kaaass.se.tasker.dto.EmployeeDto;
 import net.kaaass.se.tasker.dto.EmployeeType;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.EmployeeMapper;
+import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.AuthService;
 import net.kaaass.se.tasker.service.EmployeeService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,18 +55,24 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto add(EmployeeRequest request) throws BadRequestException, NotFoundException {
         var entity = new EmployeeEntity();
+        authService.grant(request.getUid(), Role.EMPLOYEE);
         return saveBaseOnEntity(request, entity);
     }
 
     private EmployeeDto saveBaseOnEntity(EmployeeRequest request, EmployeeEntity entity)
-            throws BadRequestException, NotFoundException {
+            throws BadRequestException, UserNotFoundException {
         var type = EmployeeType.valueOfThrow(request.getType());
         entity.setName(request.getName());
         entity.setType(type);
         if (request.getUid() != null)
             entity.setUser(authService.getEntity(request.getUid())
-                    .orElseThrow(() -> new NotFoundException("该用户不存在！")));
-        var result = repository.save(entity);
+                    .orElseThrow(UserNotFoundException::new));
+        EmployeeEntity result;
+        try {
+            result = repository.saveAndFlush(entity);
+        } catch (Exception e) {
+            throw new BadRequestException("用户已经存在员工记录！");
+        }
         return mapper.entityToDto(result);
     }
 
@@ -78,4 +86,5 @@ public class EmployeeServiceImpl implements EmployeeService {
     public Optional<EmployeeEntity> getEntity(String eid) {
         return repository.findById(eid);
     }
+
 }
