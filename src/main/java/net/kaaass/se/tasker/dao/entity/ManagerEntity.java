@@ -30,8 +30,17 @@ public class ManagerEntity {
     @JoinColumn(name = "uid", unique = true)
     private UserEntity user;
 
+    /*
+     * 外键
+     */
+
     @OneToMany(mappedBy = "manager",
             fetch = FetchType.LAZY,
             cascade = CascadeType.ALL)
     private Set<EmployeeEntity> employeeGroup;
+
+    @OneToMany(mappedBy = "undertaker",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private Set<ProjectEntity> ownedProjects;
 }

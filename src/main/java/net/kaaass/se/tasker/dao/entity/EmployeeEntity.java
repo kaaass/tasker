@@ -7,6 +7,7 @@ import net.kaaass.se.tasker.util.Constants;
 import org.hibernate.annotations.GenericGenerator;
 
 import javax.persistence.*;
+import java.util.Set;
 
 /**
  * 员工表
@@ -36,4 +37,23 @@ public class EmployeeEntity {
     @ManyToOne
     @JoinColumn(name = "manager_id")
     private ManagerEntity manager;
+
+    /*
+     * 外键
+     */
+
+    @OneToMany(mappedBy = "undertaker",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private Set<TaskEntity> ownedTasks;
+
+    @OneToMany(mappedBy = "from",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private Set<DelegateEntity> giveOutDelegates;
+
+    @OneToMany(mappedBy = "delegateTo",
+            fetch = FetchType.LAZY,
+            cascade = CascadeType.ALL)
+    private Set<DelegateEntity> ownedDelegates;
 }
