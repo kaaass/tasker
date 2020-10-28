@@ -38,5 +38,7 @@ public interface ProjectService {
 
     ResourceDto getOrCreateProjectDocument(ProjectDto projectDto);
 
+    ProjectEntity checkProjectDone(String pid) throws ProjectNotFoundException;
+
     void checkViewPermit(String pid, UserDto userDto) throws ProjectNotFoundException, ManagerNotFoundException, ForbiddenException, EmployeeNotFoundException;
 }

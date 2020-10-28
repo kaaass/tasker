@@ -40,11 +40,18 @@ public interface TaskService {
 
     ResourceDto finishTask(String tid) throws TaskNotFoundException, BadRequestException;
 
-    TaskDto confirmTask(String tid) throws TaskNotFoundException, BadRequestException;
+    TaskDto confirmTask(String tid) throws TaskNotFoundException, BadRequestException, ProjectNotFoundException;
 
     TaskDto rejectTask(String tid) throws TaskNotFoundException, BadRequestException;
 
     List<TaskDto> listTaskForEmployee(String eid) throws EmployeeNotFoundException;
+
+    /**
+     * 获得当前可以开始的任务
+     *
+     * 即前序任务全部完成、任务状态处于CREATED、INACTIVE的
+     */
+    List<TaskEntity> getReadyTaskForProject(String pid) throws ProjectNotFoundException;
 
     /**
      * 查看已委托给他人的任务

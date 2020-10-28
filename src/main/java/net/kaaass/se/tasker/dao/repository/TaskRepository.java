@@ -11,4 +11,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface TaskRepository extends JpaRepository<TaskEntity, String> {
 
     boolean existsByProjectAndStatus(ProjectEntity project, TaskStatus status);
+
+    boolean existsByProjectAndStatusIsNot(ProjectEntity project, TaskStatus status);
 }

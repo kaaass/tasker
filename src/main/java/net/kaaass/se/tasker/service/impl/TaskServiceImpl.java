@@ -11,6 +11,7 @@ import net.kaaass.se.tasker.dao.repository.EmployeeRepository;
 import net.kaaass.se.tasker.dao.repository.TaskRepository;
 import net.kaaass.se.tasker.dto.*;
 import net.kaaass.se.tasker.event.TaskFinishEvent;
+import net.kaaass.se.tasker.event.TaskStartEvent;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service;
 import javax.transaction.Transactional;
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -167,7 +170,8 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDto confirmTask(String tid) throws TaskNotFoundException, BadRequestException {
+    @Transactional
+    public TaskDto confirmTask(String tid) throws TaskNotFoundException, BadRequestException, ProjectNotFoundException {
         checkDelegateExpire();
         var entity = getEntityRaw(tid);
         // 确认必须是 WAIT_REVIEW 状态
@@ -176,9 +180,37 @@ public class TaskServiceImpl implements TaskService {
         }
         // 确认后设置为 DONE 状态
         entity.setStatus(TaskStatus.DONE);
-        var result = mapper.entityToDto(repository.save(entity));
+        // 更新项目文档
+        var document = entity.getPending();
+        var project = entity.getProject();
+        project.setDoc(document);
+        // 保存
+        entity = repository.save(entity);
+        var result = mapper.entityToDto(entity);
         // 触发任务完成事件
         TaskerApplication.EVENT_BUS.post(new TaskFinishEvent(result));
+        // 检查项目是否结束
+        project = projectService.checkProjectDone(project.getId());
+        // 如果项目在活动中，则开始新的任务
+        if (project.getStatus() == ProjectStatus.ACTIVE) {
+            // 获取并更新最新任务
+            var updateTasks = new ArrayList<TaskEntity>();
+            getReadyTaskForProject(project.getId()).forEach(task -> {
+                task.setStatus(TaskStatus.ACTIVE);
+                updateTasks.add(task);
+            });
+            for (var task : updateTasks) {
+                repository.save(task);
+            }
+            // 触发任务开始事件
+            if (!updateTasks.isEmpty()) {
+                TaskerApplication.EVENT_BUS.post(new TaskStartEvent(
+                        updateTasks.stream()
+                                .map(mapper::entityToDto)
+                                .collect(Collectors.toList())
+                ));
+            }
+        }
         return result;
     }
 
@@ -202,6 +234,24 @@ public class TaskServiceImpl implements TaskService {
         var employee = employeeService.getEntity(eid).orElseThrow(EmployeeNotFoundException::new);
         return employee.getOwnedTasks().stream()
                 .map(mapper::entityToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<TaskEntity> getReadyTaskForProject(String pid) throws ProjectNotFoundException {
+        var project = projectService.getEntity(pid).orElseThrow(ProjectNotFoundException::new);
+        var tasks = project.getTasks();
+        // 构建任务状态表
+        var statusMap = new HashMap<String, TaskStatus>();
+        tasks.forEach(taskDto -> statusMap.put(taskDto.getId(), taskDto.getStatus()));
+        // 筛选
+        return tasks.parallelStream()
+                // 根据当前状态
+                .filter(task -> task.getStatus() == TaskStatus.CREATED ||
+                        task.getStatus() == TaskStatus.INACTIVE)
+                // 之前任务状态都为 DONE
+                .filter(task -> task.getPrevious().parallelStream()
+                        .allMatch(taskDto -> statusMap.get(taskDto.getId()) == TaskStatus.DONE))
                 .collect(Collectors.toList());
     }
 
@@ -256,6 +306,6 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     public void checkViewPermit(String tid, UserDto userDto) {
-        // TODO
+        // TODO 检查查看任务权限
     }
 }

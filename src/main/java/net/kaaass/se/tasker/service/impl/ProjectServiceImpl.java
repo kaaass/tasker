@@ -3,8 +3,10 @@ package net.kaaass.se.tasker.service.impl;
 import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.controller.request.GenerateProjectRequest;
 import net.kaaass.se.tasker.dao.entity.ProjectEntity;
+import net.kaaass.se.tasker.dao.entity.TaskEntity;
 import net.kaaass.se.tasker.dao.repository.ManagerRepository;
 import net.kaaass.se.tasker.dao.repository.ProjectRepository;
+import net.kaaass.se.tasker.dao.repository.TaskRepository;
 import net.kaaass.se.tasker.dto.*;
 import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
@@ -22,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -54,6 +58,9 @@ public class ProjectServiceImpl implements ProjectService {
     @Autowired
     private EmployeeService employeeService;
 
+    @Autowired
+    private TaskRepository taskRepository;
+
     @Override
     public List<ProjectDto> getAll(Pageable pageable) {
         return repository.findAll(pageable).stream()
@@ -78,16 +85,23 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    @Transactional
     public ProjectDto startProject(String pid) throws ProjectNotFoundException {
         var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
         entity.setStatus(ProjectStatus.ACTIVE);
-        // 所有 CREATED、INACTIVE 的变成 ACTIVE
-        // TODO 不是所有，是拓扑排序第一次，或者说所有先序结点都完成的
-        entity.getTasks().stream()
+        // 允许的 CREATED、INACTIVE 的变成 ACTIVE
+        var updateTasks = new ArrayList<TaskEntity>();
+        taskService.getReadyTaskForProject(pid).stream()
                 .filter(task -> task.getStatus() == TaskStatus.CREATED ||
                         task.getStatus() == TaskStatus.INACTIVE)
-                .forEach(task -> task.setStatus(TaskStatus.ACTIVE));
+                .forEach(task -> {
+                    task.setStatus(TaskStatus.ACTIVE);
+                    updateTasks.add(task);
+                });
         repository.save(entity);
+        for (var task : updateTasks) {
+            taskRepository.save(task);
+        }
         return mapper.entityToDto(entity);
     }
 
@@ -136,10 +150,21 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
+    public ProjectEntity checkProjectDone(String pid) throws ProjectNotFoundException {
+        var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
+        var hasRestTask = taskRepository.existsByProjectAndStatusIsNot(entity, TaskStatus.DONE);
+        // 没有更多的项目了，项目结束
+        if (!hasRestTask) {
+            entity.setStatus(ProjectStatus.DONE);
+            entity = repository.save(entity);
+        }
+        return entity;
+    }
+
+    @Override
     public void checkViewPermit(String pid, UserDto userDto)
             throws ProjectNotFoundException, ManagerNotFoundException, ForbiddenException, EmployeeNotFoundException {
         var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
-        // TODO
         var roles = userDto.getRoles();
         if (roles.contains(Role.ADMIN)) {
             // 管理员允许一切
