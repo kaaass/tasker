@@ -24,7 +24,7 @@ public class DelegateEntity {
     @GeneratedValue(generator = Constants.ID_GENERATOR)
     private String id;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne(cascade = CascadeType.PERSIST)
     @JoinColumn(name = "task_id")
     private TaskEntity task;
 

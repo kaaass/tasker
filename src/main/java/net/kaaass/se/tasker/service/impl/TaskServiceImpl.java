@@ -76,7 +76,7 @@ public class TaskServiceImpl implements TaskService {
     @Override
     public void checkDelegateExpire() {
         // 找所有当前时间之前结束的委托
-        var delegates = delegateRepository.findAllByExpireBefore(Timestamp.valueOf(LocalDateTime.now()));
+        var delegates = delegateRepository.findAllByExpireBeforeAndExpireNotNull(Timestamp.valueOf(LocalDateTime.now()));
         // 对每个委托，撤销
         delegates.forEach(delegateEntity -> {
             try {
@@ -167,7 +167,7 @@ public class TaskServiceImpl implements TaskService {
         var entity = getEntityRaw(tid);
         // 完成必须是 ACTIVE 或 REJECTED 状态
         if (entity.getStatus() != TaskStatus.ACTIVE &&
-            entity.getStatus() != TaskStatus.REJECTED) {
+                entity.getStatus() != TaskStatus.REJECTED) {
             throw new BadRequestException("送审必须是 ACTIVE 或 REJECTED 状态！");
         }
         // 同一时间一个项目处于提交状态的任务只能有一个
@@ -284,18 +284,24 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public DelegateDto addDelegate(String tid, DelegateRequest request, String uid) throws TaskNotFoundException, EmployeeNotFoundException {
+    public DelegateDto addDelegate(String tid, DelegateRequest request, String uid) throws TaskNotFoundException, EmployeeNotFoundException, BadRequestException {
         var delegate = new DelegateEntity();
         // 解析
         var entity = getEntityRaw(tid);
         var delegateTo = employeeService.getEntity(request.getDelegateTo())
                 .orElseThrow(EmployeeNotFoundException::new);
         var me = employeeRepository.findByUserId(uid).orElseThrow(EmployeeNotFoundException::new);
+        // 不能委派给自己
+        if (delegateTo.getId() == me.getId()) {
+            throw new BadRequestException("不能委派给自己！");
+        }
         // 创建
         delegate.setTask(entity);
         delegate.setFrom(me);
         delegate.setDelegateTo(delegateTo);
-        delegate.setExpire(Timestamp.valueOf(request.getExpire()));
+        delegate.setExpire(
+                request.getExpire() == null ? null
+                        : Timestamp.valueOf(request.getExpire()));
         // 保存
         var result = delegateRepository.save(delegate);
         // 修改原任务的分配者
@@ -308,18 +314,19 @@ public class TaskServiceImpl implements TaskService {
     @Override
     @Transactional
     public TaskDto withdrawDelegate(String tid) throws NotFoundException {
-        checkDelegateExpire();
         var entity = getEntityRaw(tid);
         var delegate = entity.getDelegate();
         if (delegate == null) {
             throw new NotFoundException("该任务没有委托！");
         }
-        // 删除委托
-        delegateRepository.delete(delegate);
-        // 恢复原任务的分配者，设置delegate
+        // 恢复原任务的分配者
         entity.setUndertaker(delegate.getFrom());
         entity.setDelegate(null);
         var result = repository.save(entity);
+        repository.flush();
+        // 删除委托
+        delegateRepository.delete(delegate);
+        delegateRepository.flush();
         return mapper.entityToDto(result);
     }
 
@@ -336,8 +343,12 @@ public class TaskServiceImpl implements TaskService {
             // 员工必须是被分配任务的项目
             var employee = employeeRepository.findByUserId(userDto.getId())
                     .orElseThrow(EmployeeNotFoundException::new);
+            // 检查自己任务
             if (!repository.existsByIdAndUndertaker(tid, employee)) {
-                throw new ForbiddenException("无权查看、操作此任务！");
+                // 检查委派任务
+                if (!delegateRepository.existsByTaskIdAndFromId(tid, employee.getId())) {
+                    throw new ForbiddenException("无权查看、操作此任务！");
+                }
             }
         }
     }

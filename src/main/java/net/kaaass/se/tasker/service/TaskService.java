@@ -59,7 +59,7 @@ public interface TaskService {
      */
     List<DelegateDto> listDelegateForEmployee(String eid) throws EmployeeNotFoundException;
 
-    DelegateDto addDelegate(String tid, DelegateRequest request, String uid) throws TaskNotFoundException, EmployeeNotFoundException;
+    DelegateDto addDelegate(String tid, DelegateRequest request, String uid) throws TaskNotFoundException, EmployeeNotFoundException, BadRequestException;
 
     TaskDto withdrawDelegate(String tid) throws NotFoundException;
 

@@ -11,5 +11,7 @@ import java.util.List;
  */
 public interface DelegateRepository extends JpaRepository<DelegateEntity, String> {
 
-    List<DelegateEntity> findAllByExpireBefore(Timestamp expire);
+    List<DelegateEntity> findAllByExpireBeforeAndExpireNotNull(Timestamp expire);
+
+    boolean existsByTaskIdAndFromId(String task_id, String from_id);
 }

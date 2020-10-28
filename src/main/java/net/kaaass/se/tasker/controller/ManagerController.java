@@ -10,6 +10,7 @@ import net.kaaass.se.tasker.mapper.ManagerMapper;
 import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.ManagerService;
+import net.kaaass.se.tasker.service.TaskService;
 import net.kaaass.se.tasker.vo.EmployeeVo;
 import net.kaaass.se.tasker.vo.ManagerVo;
 import net.kaaass.se.tasker.vo.TaskVo;
@@ -39,6 +40,9 @@ public class ManagerController extends BaseController {
 
     @Autowired
     private TaskMapper taskMapper;
+
+    @Autowired
+    private TaskService taskService;
 
     /**
      * 向经理组内增加员工
@@ -121,6 +125,7 @@ public class ManagerController extends BaseController {
     @GetMapping("/{mid}/task")
     @Secured({Role.ADMIN, Role.MANAGER})
     List<TaskVo> listTask(@PathVariable String mid) throws ManagerNotFoundException {
+        taskService.checkDelegateExpire();
         return service.listTaskForManager(mid).stream()
                 .map(taskMapper::dtoToVo)
                 .collect(Collectors.toList());
@@ -129,6 +134,7 @@ public class ManagerController extends BaseController {
     @GetMapping("/task")
     @Secured({Role.MANAGER})
     List<TaskVo> listTask() throws ManagerNotFoundException {
+        taskService.checkDelegateExpire();
         var manager = service.getByUid(getUid()).orElseThrow(ManagerNotFoundException::new);
         return service.listTaskForManager(manager.getId()).stream()
                 .map(taskMapper::dtoToVo)

@@ -16,6 +16,7 @@ import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.EmployeeService;
 import net.kaaass.se.tasker.service.ManagerService;
 import net.kaaass.se.tasker.service.ProjectService;
+import net.kaaass.se.tasker.service.TaskService;
 import net.kaaass.se.tasker.vo.ProjectVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -48,6 +49,9 @@ public class ProjectController extends BaseController {
 
     @Autowired
     private TaskMapper taskMapper;
+
+    @Autowired
+    private TaskService taskService;
 
     /**
      * 根据权限显示所有项目
@@ -160,6 +164,7 @@ public class ProjectController extends BaseController {
             throws ProjectNotFoundException, ForbiddenException, ManagerNotFoundException, EmployeeNotFoundException {
         // 检查查看权限
         service.checkViewPermit(pid, getUserDto());
+        taskService.checkDelegateExpire();
         // 查询
         var response = new ProjectInfoResponse();
         response.setInfo(service.getByPid(pid)

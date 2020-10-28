@@ -71,6 +71,7 @@ public class EmployeeController extends BaseController {
     @GetMapping("/{eid}/delegate")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
     public List<DelegateVo> listDelegate(@PathVariable String eid) throws EmployeeNotFoundException {
+        taskService.checkDelegateExpire();
         return taskService.listDelegateForEmployee(eid).stream()
                 .map(taskMapper::dtoToVo)
                 .collect(Collectors.toList());
@@ -82,6 +83,7 @@ public class EmployeeController extends BaseController {
     @GetMapping("/{eid}/task")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
     public List<TaskVo> listTask(@PathVariable String eid) throws EmployeeNotFoundException {
+        taskService.checkDelegateExpire();
         return taskService.listTaskForEmployee(eid).stream()
                 .map(taskMapper::dtoToVo)
                 .collect(Collectors.toList());
@@ -93,6 +95,7 @@ public class EmployeeController extends BaseController {
     @GetMapping("/task")
     @Secured({Role.EMPLOYEE})
     public List<TaskVo> listTask() throws EmployeeNotFoundException {
+        taskService.checkDelegateExpire();
         var employee = service.getByUid(getUid())
                 .orElseThrow(EmployeeNotFoundException::new);
         return taskService.listTaskForEmployee(employee.getId()).stream()

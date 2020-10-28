@@ -133,7 +133,7 @@ public class TaskController extends BaseController {
     @PostMapping("/{tid}/delegate")
     @Secured({Role.EMPLOYEE})
     public DelegateVo delegateTask(@PathVariable String tid,
-                                   @RequestBody DelegateRequest request) throws EmployeeNotFoundException, TaskNotFoundException, ForbiddenException {
+                                   @RequestBody DelegateRequest request) throws EmployeeNotFoundException, TaskNotFoundException, ForbiddenException, BadRequestException {
         service.checkViewPermit(tid, getUserDto());
         return mapper.dtoToVo(service.addDelegate(tid, request, getUid()));
     }
