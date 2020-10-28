@@ -81,10 +81,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public List<ProjectDto> getAllForManager(ManagerDto managerDto, Pageable pageable) throws ManagerNotFoundException {
-        var entity = managerService.getEntity(managerDto.getId())
+    public List<ProjectEntity> getAllForManagerEntity(String mid, Pageable pageable) throws ManagerNotFoundException {
+        var entity = managerService.getEntity(mid)
                 .orElseThrow(ManagerNotFoundException::new);
-        return entity.getOwnedProjects().stream()
+        return new ArrayList<>(entity.getOwnedProjects());
+    }
+
+    @Override
+    public List<ProjectDto> getAllForManager(ManagerDto managerDto, Pageable pageable) throws ManagerNotFoundException {
+        return getAllForManagerEntity(managerDto.getId(), pageable).stream()
                 .map(mapper::entityToDto)
                 .collect(Collectors.toList());
     }

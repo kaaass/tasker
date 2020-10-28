@@ -7,15 +7,18 @@ import net.kaaass.se.tasker.dao.entity.ManagerEntity;
 import net.kaaass.se.tasker.dao.repository.ManagerRepository;
 import net.kaaass.se.tasker.dto.EmployeeDto;
 import net.kaaass.se.tasker.dto.ManagerDto;
+import net.kaaass.se.tasker.dto.TaskDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.EmployeeMapper;
 import net.kaaass.se.tasker.mapper.ManagerMapper;
+import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.EmployeeService;
 import net.kaaass.se.tasker.service.ManagerService;
+import net.kaaass.se.tasker.service.ProjectService;
 import net.kaaass.se.tasker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
@@ -47,6 +50,12 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private ProjectService projectService;
+
+    @Autowired
+    private TaskMapper taskMapper;
 
     @Override
     public Optional<EmployeeDto> addToGroup(String mid, String eid)
@@ -140,5 +149,14 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public Optional<ManagerEntity> getEntity(String mid) {
         return repository.findById(mid);
+    }
+
+    @Override
+    public List<TaskDto> listTaskForManager(String mid) throws ManagerNotFoundException {
+        var projects = projectService.getAllForManagerEntity(mid, Pageable.unpaged());
+        return projects.stream()
+                .flatMap(project -> project.getTasks().stream())
+                .map(taskMapper::entityToDto)
+                .collect(Collectors.toList());
     }
 }

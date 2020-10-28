@@ -5,12 +5,14 @@ import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
 import net.kaaass.se.tasker.dao.entity.ManagerEntity;
 import net.kaaass.se.tasker.dto.EmployeeDto;
 import net.kaaass.se.tasker.dto.ManagerDto;
+import net.kaaass.se.tasker.dto.TaskDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import org.springframework.data.domain.Pageable;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -36,4 +38,6 @@ public interface ManagerService {
     Optional<ManagerDto> getByUid(String uid);
 
     Optional<ManagerEntity> getEntity(String mid);
+
+    List<TaskDto> listTaskForManager(String mid) throws ManagerNotFoundException;
 }

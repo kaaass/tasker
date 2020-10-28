@@ -22,6 +22,8 @@ public interface ProjectService {
 
     List<ProjectDto> getAll(Pageable pageable);
 
+    List<ProjectEntity> getAllForManagerEntity(String mid, Pageable pageable) throws ManagerNotFoundException;
+
     List<ProjectDto> getAllForManager(ManagerDto managerDto, Pageable pageable) throws ManagerNotFoundException;
 
     List<ProjectDto> getAllForEmployee(EmployeeDto employeeDto, Pageable pageable);

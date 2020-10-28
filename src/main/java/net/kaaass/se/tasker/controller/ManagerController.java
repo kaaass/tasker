@@ -7,10 +7,12 @@ import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.EmployeeMapper;
 import net.kaaass.se.tasker.mapper.ManagerMapper;
+import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.ManagerService;
 import net.kaaass.se.tasker.vo.EmployeeVo;
 import net.kaaass.se.tasker.vo.ManagerVo;
+import net.kaaass.se.tasker.vo.TaskVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.annotation.Secured;
@@ -34,6 +36,9 @@ public class ManagerController extends BaseController {
 
     @Autowired
     private EmployeeMapper employeeMapper;
+
+    @Autowired
+    private TaskMapper taskMapper;
 
     /**
      * 向经理组内增加员工
@@ -110,5 +115,22 @@ public class ManagerController extends BaseController {
         return service.getByUid(getUid())
                 .map(mapper::dtoToVo)
                 .orElseThrow(ManagerNotFoundException::new);
+    }
+
+    @GetMapping("/{mid}/task")
+    @Secured({Role.ADMIN, Role.MANAGER})
+    List<TaskVo> listTask(@PathVariable String mid) throws ManagerNotFoundException {
+        return service.listTaskForManager(mid).stream()
+                .map(taskMapper::dtoToVo)
+                .collect(Collectors.toList());
+    }
+
+    @GetMapping("/task")
+    @Secured({Role.MANAGER})
+    List<TaskVo> listTask() throws ManagerNotFoundException {
+        var manager = service.getByUid(getUid()).orElseThrow(ManagerNotFoundException::new);
+        return service.listTaskForManager(manager.getId()).stream()
+                .map(taskMapper::dtoToVo)
+                .collect(Collectors.toList());
     }
 }
