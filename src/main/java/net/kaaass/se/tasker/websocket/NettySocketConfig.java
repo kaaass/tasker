@@ -1,6 +1,7 @@
 package net.kaaass.se.tasker.websocket;
 
 import com.corundumstudio.socketio.SocketIOServer;
+import com.corundumstudio.socketio.Transport;
 import com.corundumstudio.socketio.annotation.SpringAnnotationScanner;
 import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
@@ -45,6 +46,12 @@ public class NettySocketConfig {
         config.setUpgradeTimeout(upgradeTimeout);
         config.setPingInterval(pingInterval);
         config.setPingTimeout(pingTimeout);
+        // 防止同源错误
+        config.setOrigin("*");
+        config.setTransports(Transport.POLLING, Transport.WEBSOCKET);
+        // 避免重启故障
+        var socketConfig = config.getSocketConfig();
+        socketConfig.setReuseAddress(true);
         // WebSocket 鉴权
         config.setAuthorizationListener(handshakeData -> {
             var token = handshakeData.getSingleUrlParam("token");
