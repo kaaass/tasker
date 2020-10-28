@@ -91,6 +91,13 @@ public class TaskServiceImpl implements TaskService {
     public TaskDto update(String tid, TaskRequest request) throws TaskNotFoundException, ProjectNotFoundException, EmployeeNotFoundException, BadRequestException {
         checkDelegateExpire();
         var entity = getEntity(tid).orElseThrow(TaskNotFoundException::new);
+        // 检查 type 是否一致
+        var undertaker = employeeService.getEntity(request.getUndertakerEid())
+                .orElseThrow(EmployeeNotFoundException::new);
+        if (entity.getType() != undertaker.getType()) {
+            throw new BadRequestException("员工类型与任务类型不同，无法更新！");
+        }
+        // 保存
         return saveBaseOnEntity(request, entity);
     }
 
