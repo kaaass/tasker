@@ -27,6 +27,8 @@ public interface UserMapper {
     }
 
     default UserRequest mapUserRequest(UserRegisterRequest registerRequest) {
-        return new UserRequest(registerRequest.getUsername());
+        return new UserRequest(
+                registerRequest.getUsername(),
+                registerRequest.getPassword());
     }
 }

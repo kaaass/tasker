@@ -71,6 +71,7 @@ public class AuthServiceImpl implements AuthService {
             var request = mapper.mapUserRequest(userToAdd);
             result = userService.add(request).orElseThrow();
         } catch (Exception e) {
+            log.debug("用户信息创建失败", e);
             return Optional.empty();
         }
         // 员工信息注册

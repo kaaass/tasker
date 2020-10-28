@@ -1,14 +1,17 @@
 package net.kaaass.se.tasker.controller.request;
 
+import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.springframework.lang.NonNull;
+import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import org.springframework.lang.Nullable;
 
 /**
  * 增加、修改用户请求对象
  */
 @Data
+@RequiredArgsConstructor
+@AllArgsConstructor
 public class UserRequest {
 
     @NonNull
