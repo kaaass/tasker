@@ -21,7 +21,6 @@ import javax.transaction.Transactional;
 @Aspect
 @Component
 @Order(1) // 先于一切切面
-@Transactional
 public class AccessLoggerAspect {
 
     /**
@@ -32,7 +31,7 @@ public class AccessLoggerAspect {
     }
 
     @Around("logMe()")
-    public Object arround(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
+    public Object around(ProceedingJoinPoint proceedingJoinPoint) throws Throwable {
         // 请求处理前
         var args = proceedingJoinPoint.getArgs();
         var staticPart = proceedingJoinPoint.getStaticPart();
