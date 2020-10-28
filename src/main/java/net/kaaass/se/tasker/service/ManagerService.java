@@ -40,4 +40,6 @@ public interface ManagerService {
     Optional<ManagerEntity> getEntity(String mid);
 
     List<TaskDto> listTaskForManager(String mid) throws ManagerNotFoundException;
+
+    void deleteManager(String mid) throws ManagerNotFoundException;
 }

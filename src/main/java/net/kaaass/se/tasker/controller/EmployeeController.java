@@ -119,4 +119,13 @@ public class EmployeeController extends BaseController {
                 .map(mapper::dtoToVo)
                 .orElseThrow(() -> new NotFoundException("当前用户的员工信息不存在！"));
     }
+
+    /**
+     * 管理员删除 Employee
+     */
+    @DeleteMapping("/{eid}")
+    @Secured({Role.ADMIN})
+    public void deleteEmployee(@PathVariable String eid) throws EmployeeNotFoundException {
+        service.deleteEmployee(eid);
+    }
 }

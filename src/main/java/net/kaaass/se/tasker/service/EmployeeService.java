@@ -26,4 +26,6 @@ public interface EmployeeService {
     Optional<EmployeeDto> getByUid(String uid);
 
     Optional<EmployeeEntity> getEntity(String eid);
+
+    void deleteEmployee(String eid) throws EmployeeNotFoundException;
 }

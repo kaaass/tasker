@@ -8,6 +8,7 @@ import net.kaaass.se.tasker.dto.EmployeeDto;
 import net.kaaass.se.tasker.dto.TaskType;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
+import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.EmployeeMapper;
 import net.kaaass.se.tasker.security.Role;
@@ -47,8 +48,7 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public EmployeeDto update(String eid, EmployeeRequest request)
             throws NotFoundException, BadRequestException {
-        var entity = getEntity(eid)
-                .orElseThrow(() -> new NotFoundException("员工信息不存在！"));
+        var entity = getEntity(eid).orElseThrow(EmployeeNotFoundException::new);
         return saveBaseOnEntity(request, entity);
     }
 
@@ -85,6 +85,12 @@ public class EmployeeServiceImpl implements EmployeeService {
     @Override
     public Optional<EmployeeEntity> getEntity(String eid) {
         return repository.findById(eid);
+    }
+
+    @Override
+    public void deleteEmployee(String eid) throws EmployeeNotFoundException {
+        var entity = getEntity(eid).orElseThrow(EmployeeNotFoundException::new);
+        repository.delete(entity);
     }
 
 }

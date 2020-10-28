@@ -159,4 +159,10 @@ public class ManagerServiceImpl implements ManagerService {
                 .map(taskMapper::entityToDto)
                 .collect(Collectors.toList());
     }
+
+    @Override
+    public void deleteManager(String mid) throws ManagerNotFoundException {
+        var entity = getEntity(mid).orElseThrow(ManagerNotFoundException::new);
+        repository.delete(entity);
+    }
 }

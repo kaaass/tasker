@@ -133,4 +133,13 @@ public class ManagerController extends BaseController {
                 .map(taskMapper::dtoToVo)
                 .collect(Collectors.toList());
     }
+
+    /**
+     * 管理员删除经理
+     */
+    @DeleteMapping("/{mid}")
+    @Secured({Role.ADMIN})
+    public void deleteManager(@PathVariable String mid) throws ManagerNotFoundException {
+        service.deleteManager(mid);
+    }
 }
