@@ -86,7 +86,7 @@ public class ResourceController extends BaseController {
         var newFileName = StringUtils.uuid() + "." + suffix;
         // TODO 检查suffix
 
-        File destFile = new File(uploadFolder + Constants.IMAGE_PATH + newFileName);
+        File destFile = new File(uploadFolder + Constants.DOCUMENT_PATH + newFileName);
         file.transferTo(destFile);
 
         var url = Constants.UPLOAD_BASE + Constants.DOCUMENT_PATH + newFileName;
