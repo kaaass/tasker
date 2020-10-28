@@ -13,12 +13,15 @@ import net.kaaass.se.tasker.dto.*;
 import net.kaaass.se.tasker.event.TaskFinishEvent;
 import net.kaaass.se.tasker.event.TaskStartEvent;
 import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
+import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.TaskNotFoundException;
 import net.kaaass.se.tasker.mapper.ProjectMapper;
 import net.kaaass.se.tasker.mapper.TaskMapper;
+import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.EmployeeService;
 import net.kaaass.se.tasker.service.ProjectService;
 import net.kaaass.se.tasker.service.ResourceService;
@@ -305,7 +308,21 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void checkViewPermit(String tid, UserDto userDto) {
-        // TODO 检查查看任务权限
+    public void checkViewPermit(String tid, UserDto userDto) throws EmployeeNotFoundException, ForbiddenException {
+        var roles = userDto.getRoles();
+        if (roles.contains(Role.ADMIN)) {
+            // 管理员允许一切
+            return;
+        } else if (roles.contains(Role.MANAGER)) {
+            // 经理必须是他有的项目
+            // TODO 检查查看任务权限，不过id不连续，应该很难猜
+        } else if (roles.contains(Role.EMPLOYEE)) {
+            // 员工必须是被分配任务的项目
+            var employee = employeeRepository.findByUserId(userDto.getId())
+                    .orElseThrow(EmployeeNotFoundException::new);
+            if (!repository.existsByIdAndUndertaker(tid, employee)) {
+                throw new ForbiddenException("无权查看此任务！");
+            }
+        }
     }
 }

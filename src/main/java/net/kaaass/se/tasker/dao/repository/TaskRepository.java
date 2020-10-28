@@ -1,5 +1,6 @@
 package net.kaaass.se.tasker.dao.repository;
 
+import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
 import net.kaaass.se.tasker.dao.entity.ProjectEntity;
 import net.kaaass.se.tasker.dao.entity.TaskEntity;
 import net.kaaass.se.tasker.dto.TaskStatus;
@@ -13,4 +14,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, String> {
     boolean existsByProjectAndStatus(ProjectEntity project, TaskStatus status);
 
     boolean existsByProjectAndStatusIsNot(ProjectEntity project, TaskStatus status);
+
+    boolean existsByIdAndUndertaker(String tid, EmployeeEntity employee);
 }

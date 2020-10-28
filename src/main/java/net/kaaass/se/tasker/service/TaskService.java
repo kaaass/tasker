@@ -8,6 +8,7 @@ import net.kaaass.se.tasker.dto.ResourceDto;
 import net.kaaass.se.tasker.dto.TaskDto;
 import net.kaaass.se.tasker.dto.UserDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
@@ -62,5 +63,5 @@ public interface TaskService {
 
     TaskDto withdrawDelegate(String tid) throws NotFoundException;
 
-    void checkViewPermit(String tid, UserDto userDto);
+    void checkViewPermit(String tid, UserDto userDto) throws EmployeeNotFoundException, ForbiddenException;
 }

@@ -3,6 +3,7 @@ package net.kaaass.se.tasker.controller;
 import net.kaaass.se.tasker.controller.request.DelegateRequest;
 import net.kaaass.se.tasker.controller.request.TaskRequest;
 import net.kaaass.se.tasker.exception.BadRequestException;
+import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
@@ -75,7 +76,7 @@ public class TaskController extends BaseController {
      */
     @GetMapping("/{tid}/info")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
-    public TaskVo taskInfo(@PathVariable String tid) throws TaskNotFoundException {
+    public TaskVo taskInfo(@PathVariable String tid) throws TaskNotFoundException, ForbiddenException, EmployeeNotFoundException {
         service.checkViewPermit(tid, getUserDto());
         return service.getById(tid).map(mapper::dtoToVo)
                 .orElseThrow(TaskNotFoundException::new);

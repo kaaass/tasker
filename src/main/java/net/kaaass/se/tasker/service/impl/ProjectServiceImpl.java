@@ -181,7 +181,6 @@ public class ProjectServiceImpl implements ProjectService {
         }
         // 设置任务基本信息
         var typeCount = new HashMap<TaskType, Integer>();
-        // TODO
         for (var task : tasks) {
             var type = task.getType();
             // 类型计数更新
