@@ -30,6 +30,9 @@ public class ManagerEntity {
     @JoinColumn(name = "uid", unique = true)
     private UserEntity user;
 
+    @Column(name = "deleted")
+    private Boolean deleted = false;
+
     /*
      * 外键
      */

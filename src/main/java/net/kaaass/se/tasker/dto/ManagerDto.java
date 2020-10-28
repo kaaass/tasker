@@ -13,4 +13,6 @@ public class ManagerDto {
     private String name;
 
     private UserDto user;
+
+    private boolean deleted;
 }

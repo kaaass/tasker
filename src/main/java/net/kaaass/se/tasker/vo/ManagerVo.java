@@ -13,4 +13,6 @@ public class ManagerVo {
     private String name;
 
     private UserVo user;
+
+    private boolean deleted;
 }

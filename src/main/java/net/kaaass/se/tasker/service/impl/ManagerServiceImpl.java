@@ -163,6 +163,6 @@ public class ManagerServiceImpl implements ManagerService {
     @Override
     public void deleteManager(String mid) throws ManagerNotFoundException {
         var entity = getEntity(mid).orElseThrow(ManagerNotFoundException::new);
-        repository.delete(entity);
+        entity.setDeleted(true);
     }
 }

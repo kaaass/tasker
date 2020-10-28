@@ -69,6 +69,7 @@ public class ManagerController extends BaseController {
     @Secured({Role.ADMIN})
     public List<ManagerVo> listManager(Pageable pageable) {
         return service.getAll(pageable).stream()
+                .filter(managerDto -> !managerDto.isDeleted())
                 .map(mapper::dtoToVo)
                 .collect(Collectors.toList());
     }

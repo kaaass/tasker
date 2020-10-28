@@ -18,4 +18,6 @@ public class EmployeeVo {
     private UserVo user;
 
     private ManagerVo manager;
+
+    private boolean deleted;
 }

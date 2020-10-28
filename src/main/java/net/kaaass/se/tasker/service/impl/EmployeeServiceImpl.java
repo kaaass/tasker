@@ -13,11 +13,13 @@ import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.EmployeeMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.EmployeeService;
+import net.kaaass.se.tasker.service.TaskService;
 import net.kaaass.se.tasker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -37,6 +39,9 @@ public class EmployeeServiceImpl implements EmployeeService {
 
     @Autowired
     private UserService userService;
+
+    @Autowired
+    private TaskService taskService;
 
     @Override
     public List<EmployeeDto> getAllEmployee(Pageable pageable) {
@@ -88,9 +93,11 @@ public class EmployeeServiceImpl implements EmployeeService {
     }
 
     @Override
+    @Transactional
     public void deleteEmployee(String eid) throws EmployeeNotFoundException {
         var entity = getEntity(eid).orElseThrow(EmployeeNotFoundException::new);
-        repository.delete(entity);
+        // 设置删除标记
+        entity.setDeleted(true);
     }
 
 }

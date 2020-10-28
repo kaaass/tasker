@@ -38,22 +38,25 @@ public class EmployeeEntity {
     @JoinColumn(name = "manager_id")
     private ManagerEntity manager;
 
+    @Column(name = "deleted")
+    private Boolean deleted = false;
+
     /*
      * 外键
      */
 
     @OneToMany(mappedBy = "undertaker",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.PERSIST)
     private Set<TaskEntity> ownedTasks;
 
     @OneToMany(mappedBy = "from",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.PERSIST)
     private Set<DelegateEntity> giveOutDelegates;
 
     @OneToMany(mappedBy = "delegateTo",
             fetch = FetchType.LAZY,
-            cascade = CascadeType.ALL)
+            cascade = CascadeType.PERSIST)
     private Set<DelegateEntity> ownedDelegates;
 }

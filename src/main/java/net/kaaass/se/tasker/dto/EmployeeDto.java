@@ -17,4 +17,6 @@ public class EmployeeDto {
     private UserDto user;
 
     private ManagerDto manager;
+
+    private boolean deleted;
 }

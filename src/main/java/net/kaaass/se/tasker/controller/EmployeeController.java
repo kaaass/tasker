@@ -1,6 +1,7 @@
 package net.kaaass.se.tasker.controller;
 
 import net.kaaass.se.tasker.controller.request.EmployeeRequest;
+import net.kaaass.se.tasker.dto.EmployeeDto;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
@@ -47,6 +48,7 @@ public class EmployeeController extends BaseController {
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
     public List<EmployeeVo> listEmployee(Pageable pageable) {
         return service.getAllEmployee(pageable).stream()
+                .filter(employeeDto -> !employeeDto.isDeleted())
                 .map(mapper::dtoToVo)
                 .collect(Collectors.toList());
     }
