@@ -2,6 +2,7 @@ package net.kaaass.se.tasker.service;
 
 import net.kaaass.se.tasker.controller.request.GenerateProjectRequest;
 import net.kaaass.se.tasker.dao.entity.ProjectEntity;
+import net.kaaass.se.tasker.dao.entity.ResourceEntity;
 import net.kaaass.se.tasker.dto.*;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.ForbiddenException;
@@ -25,9 +26,9 @@ public interface ProjectService {
 
     List<ProjectDto> getAllForEmployee(EmployeeDto employeeDto, Pageable pageable);
 
-    ProjectDto startProject(String pid) throws ProjectNotFoundException;
+    ProjectDto startProject(String pid) throws ProjectNotFoundException, BadRequestException;
 
-    ProjectDto stopProject(String pid) throws ProjectNotFoundException;
+    ProjectDto stopProject(String pid) throws ProjectNotFoundException, BadRequestException;
 
     List<TaskDto> getProjectTasks(String pid) throws ProjectNotFoundException;
 
@@ -37,7 +38,7 @@ public interface ProjectService {
 
     Optional<ProjectEntity> getEntity(String pid);
 
-    ResourceDto getOrCreateProjectDocument(ProjectDto projectDto) throws NotFoundException, BadRequestException;
+    ResourceEntity getOrCreateProjectDocument(ProjectDto projectDto) throws NotFoundException, BadRequestException;
 
     ProjectEntity checkProjectDone(String pid) throws ProjectNotFoundException;
 

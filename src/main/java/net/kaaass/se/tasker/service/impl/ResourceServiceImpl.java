@@ -41,6 +41,12 @@ public class ResourceServiceImpl implements ResourceService {
 
     @Override
     public Optional<ResourceDto> createByUrl(String url, ResourceType type, String uid) throws NotFoundException, BadRequestException {
+        return createByUrlRaw(url, type, uid)
+                .map(resourceMapper::entityToDto);
+    }
+
+    @Override
+    public Optional<ResourceEntity> createByUrlRaw(String url, ResourceType type, String uid) throws NotFoundException, BadRequestException {
         var entity = new ResourceEntity();
         var uploader = userService.getEntity(uid)
                 .orElseThrow(() -> new NotFoundException("用户不存在！"));
@@ -49,7 +55,7 @@ public class ResourceServiceImpl implements ResourceService {
         entity.setUploader(uploader);
         try {
             var result = resourceRepository.save(entity);
-            return Optional.ofNullable(resourceMapper.entityToDto(result));
+            return Optional.of(result);
         } catch (IllegalArgumentException e) {
             log.error("插入资源失败", e);
         } catch (DataIntegrityViolationException e) {

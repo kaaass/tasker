@@ -4,6 +4,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.controller.request.GenerateProjectRequest;
 import net.kaaass.se.tasker.controller.response.ProjectInfoResponse;
 import net.kaaass.se.tasker.dto.TaskType;
+import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
@@ -90,7 +91,7 @@ public class ProjectController extends BaseController {
      */
     @PostMapping("/{pid}/start")
     @Secured({Role.ADMIN, Role.MANAGER})
-    public ProjectVo startProject(@PathVariable String pid) throws ProjectNotFoundException {
+    public ProjectVo startProject(@PathVariable String pid) throws ProjectNotFoundException, BadRequestException {
         return mapper.dtoToVo(service.startProject(pid));
     }
 
@@ -101,7 +102,7 @@ public class ProjectController extends BaseController {
      */
     @PostMapping("/{pid}/stop")
     @Secured({Role.ADMIN, Role.MANAGER})
-    public ProjectVo stopProject(@PathVariable String pid) throws ProjectNotFoundException {
+    public ProjectVo stopProject(@PathVariable String pid) throws ProjectNotFoundException, BadRequestException {
         return mapper.dtoToVo(service.stopProject(pid));
     }
 

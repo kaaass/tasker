@@ -5,12 +5,14 @@ import net.kaaass.se.tasker.TaskerApplication;
 import net.kaaass.se.tasker.controller.request.GenerateProjectRequest;
 import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
 import net.kaaass.se.tasker.dao.entity.ProjectEntity;
+import net.kaaass.se.tasker.dao.entity.ResourceEntity;
 import net.kaaass.se.tasker.dao.entity.TaskEntity;
 import net.kaaass.se.tasker.dao.repository.ManagerRepository;
 import net.kaaass.se.tasker.dao.repository.ProjectRepository;
 import net.kaaass.se.tasker.dao.repository.TaskRepository;
 import net.kaaass.se.tasker.dto.*;
 import net.kaaass.se.tasker.event.ProjectCreateEvent;
+import net.kaaass.se.tasker.event.TaskStartEvent;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.NotFoundException;
@@ -96,8 +98,12 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Override
     @Transactional
-    public ProjectDto startProject(String pid) throws ProjectNotFoundException {
+    public ProjectDto startProject(String pid) throws ProjectNotFoundException, BadRequestException {
         var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
+        // 只能启动 INACTIVE 状态的项目
+        if (entity.getStatus() != ProjectStatus.INACTIVE) {
+            throw new BadRequestException("只能启动 INACTIVE 状态的项目！");
+        }
         entity.setStatus(ProjectStatus.ACTIVE);
         // 允许的 CREATED、INACTIVE 的变成 ACTIVE
         var updateTasks = new ArrayList<TaskEntity>();
@@ -112,13 +118,25 @@ public class ProjectServiceImpl implements ProjectService {
         for (var task : updateTasks) {
             taskRepository.save(task);
         }
+        // 触发任务开始事件
+        if (!updateTasks.isEmpty()) {
+            TaskerApplication.EVENT_BUS.post(new TaskStartEvent(
+                    updateTasks.stream()
+                            .map(taskMapper::entityToDto)
+                            .collect(Collectors.toList())
+            ));
+        }
         return mapper.entityToDto(entity);
     }
 
     @Override
-    public ProjectDto stopProject(String pid) throws ProjectNotFoundException {
+    public ProjectDto stopProject(String pid) throws ProjectNotFoundException, BadRequestException {
         var entity = getEntity(pid).orElseThrow(ProjectNotFoundException::new);
-        entity.setStatus(ProjectStatus.ACTIVE);
+        // 只能暂停 ACTIVE 状态的项目
+        if (entity.getStatus() != ProjectStatus.ACTIVE) {
+            throw new BadRequestException("只能暂停 ACTIVE 状态的项目！");
+        }
+        entity.setStatus(ProjectStatus.INACTIVE);
         // 所有 ACTIVE、REJECTED 的变成 INACTIVE
         entity.getTasks().stream()
                 .filter(task -> task.getStatus() == TaskStatus.ACTIVE ||
@@ -227,15 +245,15 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ResourceDto getOrCreateProjectDocument(ProjectDto projectDto) throws NotFoundException, BadRequestException {
+    public ResourceEntity getOrCreateProjectDocument(ProjectDto projectDto) throws NotFoundException, BadRequestException {
         var entity = getEntity(projectDto.getId()).orElseThrow(ProjectNotFoundException::new);
         var doc = entity.getDoc();
         // 若存在直接返回
         if (doc != null) {
-            return resourceMapper.entityToDto(doc);
+            return doc;
         }
         // 若不存在从模板创建一个资源
-        var result = resourceService.createByUrl(templateDocumentPath,
+        var result = resourceService.createByUrlRaw(templateDocumentPath,
                 ResourceType.DOCUMENT,
                 entity.getUndertaker().getUser().getId());
         return result.orElseThrow();

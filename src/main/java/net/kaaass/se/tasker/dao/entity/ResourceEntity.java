@@ -24,7 +24,7 @@ public class ResourceEntity {
     @Column(name = "type")
     private ResourceType type;
 
-    @Column(name = "url", unique = true)
+    @Column(name = "url")
     private String url;
 
     @ManyToOne

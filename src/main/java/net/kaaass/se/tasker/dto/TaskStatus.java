@@ -3,9 +3,9 @@ package net.kaaass.se.tasker.dto;
 /**
  * 任务状态
  *
- *                     INACTIVE <----------------------------------  REJECTED
- *                        |↑    /project/stop                           ↑ /task/reject
- *        /project/start  ↓|                                            |
+ *                     INACTIVE <---------------+------------------  REJECTED
+ *                        |↑    /project/stop   | /task/finish          ↑ /task/reject
+ *        /project/start  ↓|                    ↓                       |
  * CREATED -----------> ACTIVE -----------> WAIT_COMMIT -----------> WAIT_REVIEW -----------> DONE
  *                            /task/finish             /task/commit            /task/confirm
  */

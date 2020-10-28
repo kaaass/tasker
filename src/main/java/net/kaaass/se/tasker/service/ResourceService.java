@@ -21,6 +21,11 @@ public interface ResourceService {
     Optional<ResourceDto> createByUrl(String url, ResourceType type, String uid) throws NotFoundException, BadRequestException;
 
     /**
+     * 通过 url 创建资源
+     */
+    Optional<ResourceEntity> createByUrlRaw(String url, ResourceType type, String uid) throws NotFoundException, BadRequestException;
+
+    /**
      * 根据 rid 获得资源
      */
     Optional<ResourceDto> getResource(String rid);

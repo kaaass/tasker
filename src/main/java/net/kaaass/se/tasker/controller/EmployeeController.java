@@ -86,6 +86,19 @@ public class EmployeeController extends BaseController {
     }
 
     /**
+     * 获取当前账户员工被分配的任务
+     */
+    @GetMapping("/task")
+    @Secured({Role.EMPLOYEE})
+    public List<TaskVo> listTask() throws EmployeeNotFoundException {
+        var employee = service.getByUid(getUid())
+                .orElseThrow(EmployeeNotFoundException::new);
+        return taskService.listTaskForEmployee(employee.getId()).stream()
+                .map(taskMapper::dtoToVo)
+                .collect(Collectors.toList());
+    }
+
+    /**
      * 管理员增加 Employee
      */
     @PostMapping("/add")

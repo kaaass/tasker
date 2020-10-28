@@ -62,4 +62,4 @@ jwt:
 file:
   staticAccessPath: /upload/**
   uploadFolder: ../upload/  # 上传文件目录
-  templateDocumentPath: /static/document/template.docx
+  templateDocumentPath: /document/template.docx

@@ -20,6 +20,7 @@ import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.TaskNotFoundException;
 import net.kaaass.se.tasker.mapper.ProjectMapper;
+import net.kaaass.se.tasker.mapper.ResourceMapper;
 import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.EmployeeService;
@@ -68,6 +69,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private EmployeeRepository employeeRepository;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
 
     @Override
     public void checkDelegateExpire() {
@@ -154,9 +158,10 @@ public class TaskServiceImpl implements TaskService {
     public ResourceDto finishTask(String tid) throws NotFoundException, BadRequestException {
         checkDelegateExpire();
         var entity = getEntityRaw(tid);
-        // 完成必须是 ACTIVE 状态
-        if (entity.getStatus() != TaskStatus.ACTIVE) {
-            throw new BadRequestException("送审必须是 ACTIVE 状态！");
+        // 完成必须是 ACTIVE 或 REJECTED 状态
+        if (entity.getStatus() != TaskStatus.ACTIVE &&
+            entity.getStatus() != TaskStatus.REJECTED) {
+            throw new BadRequestException("送审必须是 ACTIVE 或 REJECTED 状态！");
         }
         // 同一时间一个项目处于提交状态的任务只能有一个
         var hasOtherFinishTask = repository.existsByProjectAndStatus(entity.getProject(), TaskStatus.WAIT_COMMIT);
@@ -166,11 +171,12 @@ public class TaskServiceImpl implements TaskService {
         // 完成后设置为 WAIT_COMMIT 状态
         entity.setStatus(TaskStatus.WAIT_COMMIT);
         // 获得项目文档路径
-        var result = projectService.getOrCreateProjectDocument(projectMapper.entityToDto(entity.getProject()));
+        var document = projectService.getOrCreateProjectDocument(projectMapper.entityToDto(entity.getProject()));
         // FIXME 此处错误不会回滚
+        entity.setPending(document);
         // 保存
         repository.save(entity);
-        return result;
+        return resourceMapper.entityToDto(document);
     }
 
     @Override
@@ -215,6 +221,8 @@ public class TaskServiceImpl implements TaskService {
                 ));
             }
         }
+        // 更新返回结果
+        result = getById(entity.getId()).orElseThrow();
         return result;
     }
 
