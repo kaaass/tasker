@@ -60,7 +60,7 @@ public class EventBus implements IEventExceptionHandler {
                             );
                         }
 
-                        Class<?> eventType = parameterTypes[0];
+                        Class<? extends Event> eventType = (Class<? extends Event>) parameterTypes[0];
 
                         if (!Event.class.isAssignableFrom(eventType)) {
                             throw new IllegalArgumentException("Method " + method + " has @SubscribeEvent annotation, but takes a argument that is not an Event " + eventType);
@@ -83,14 +83,13 @@ public class EventBus implements IEventExceptionHandler {
      * @param target    事件处理器目标类
      * @param method    目标方法
      */
-    private void register(Class<?> eventType, Object target, Method method) {
+    private void register(Class<? extends Event> eventType, Object target, Method method) {
         try {
             Constructor<?> ctr = eventType.getConstructor();
             ctr.setAccessible(true);
             Event event = (Event) ctr.newInstance();
             ASMEventHandler listener = new ASMEventHandler(target, method);
-            event.getListenerList().register(busID, listener.getPriority(), listener);
-
+            event.getListenerList(eventType).register(busID, listener.getPriority(), listener);
             ArrayList<IEventListener> others = listeners.computeIfAbsent(target, k -> new ArrayList<>());
             others.add(listener);
         } catch (Exception e) {
@@ -104,7 +103,7 @@ public class EventBus implements IEventExceptionHandler {
             ctr.setAccessible(true);
             Event event = (Event) ctr.newInstance();
             JavaScriptEventHandler listener = new JavaScriptEventHandler(codeStr);
-            event.getListenerList().register(busID, priority, listener);
+            event.getListenerList((Class<? extends Event>) Class.forName(eventClass)).register(busID, priority, listener);
 
             var others = pluginListeners.computeIfAbsent(pluginId, k -> new ArrayList<>());
             others.add(listener);
@@ -133,7 +132,7 @@ public class EventBus implements IEventExceptionHandler {
 
     public boolean post(Event event) {
         log.debug("触发事件：{}", event.getClass().getName());
-        IEventListener[] listeners = event.getListenerList().getListeners(busID);
+        IEventListener[] listeners = event.getListenerList(event.getClass()).getListeners(busID);
         int index = 0;
         try {
             for (; index < listeners.length; index++) {

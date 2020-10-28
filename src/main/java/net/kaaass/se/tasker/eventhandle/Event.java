@@ -2,6 +2,8 @@ package net.kaaass.se.tasker.eventhandle;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
+import java.util.HashMap;
+import java.util.Map;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
@@ -27,7 +29,7 @@ public class Event {
 
     private boolean isCanceled = false;
     private Result result = Result.DEFAULT;
-    private static ListenerList listeners = new ListenerList();
+    private static Map<Class<? extends Event>, ListenerList> listeners = new HashMap<>();
     private EventPriority phase = null;
 
     public Event() {
@@ -117,8 +119,12 @@ public class Event {
      *
      * @return Listener List
      */
-    public ListenerList getListenerList() {
-        return listeners;
+    public ListenerList getListenerList(Class<? extends Event> clazz) {
+        var result = listeners.get(clazz);
+        if (result != null)
+            return result;
+        listeners.put(clazz, new ListenerList());
+        return listeners.get(clazz);
     }
 
     public EventPriority getPhase() {
