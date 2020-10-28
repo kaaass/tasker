@@ -34,7 +34,7 @@ public class TaskVo {
 
     private boolean delegate;
 
-    private Set<TaskVo> previous;
+    private Set<String> previousId;
 
     @JsonSerialize(using = DateToLongSerializer.class)
     private Date createTime;

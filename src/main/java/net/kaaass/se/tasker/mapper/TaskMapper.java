@@ -17,6 +17,12 @@ import org.mapstruct.Named;
         uses = {ProjectMapper.class, ManagerMapper.class, EmployeeMapper.class, UserMapper.class})
 public interface TaskMapper {
 
+    @Named("getTaskId")
+    default String getTaskId(TaskDto taskDto) {
+        return taskDto.getId();
+    }
+
+    @Mapping(target = "previousId", source = "previous", qualifiedByName = "getTaskId")
     TaskVo dtoToVo(TaskDto dto);
 
     @Named("isDelegatePresents")
