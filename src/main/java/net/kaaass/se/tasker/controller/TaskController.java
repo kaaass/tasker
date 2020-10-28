@@ -100,7 +100,7 @@ public class TaskController extends BaseController {
      */
     @PostMapping("/{tid}/finish")
     @Secured({Role.EMPLOYEE})
-    public ResourceVo finishTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException {
+    public ResourceVo finishTask(@PathVariable String tid) throws BadRequestException, NotFoundException {
         return resourceMapper.dtoToVo(service.finishTask(tid));
     }
 
@@ -109,7 +109,7 @@ public class TaskController extends BaseController {
      */
     @PostMapping("/{tid}/confirm")
     @Secured({Role.MANAGER})
-    public TaskVo confirmTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException {
+    public TaskVo confirmTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException, ProjectNotFoundException {
         return mapper.dtoToVo(service.confirmTask(tid));
     }
 

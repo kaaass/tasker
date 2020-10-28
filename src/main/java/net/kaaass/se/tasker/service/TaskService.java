@@ -38,7 +38,7 @@ public interface TaskService {
 
     TaskDto commitTask(String tid, String documentId) throws NotFoundException, BadRequestException;
 
-    ResourceDto finishTask(String tid) throws TaskNotFoundException, BadRequestException;
+    ResourceDto finishTask(String tid) throws NotFoundException, BadRequestException;
 
     TaskDto confirmTask(String tid) throws TaskNotFoundException, BadRequestException, ProjectNotFoundException;
 

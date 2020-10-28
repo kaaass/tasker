@@ -148,7 +148,7 @@ public class TaskServiceImpl implements TaskService {
 
     @Override
     @Transactional
-    public ResourceDto finishTask(String tid) throws TaskNotFoundException, BadRequestException {
+    public ResourceDto finishTask(String tid) throws NotFoundException, BadRequestException {
         checkDelegateExpire();
         var entity = getEntityRaw(tid);
         // 完成必须是 ACTIVE 状态

@@ -8,19 +8,20 @@ import net.kaaass.se.tasker.dao.repository.ManagerRepository;
 import net.kaaass.se.tasker.dao.repository.ProjectRepository;
 import net.kaaass.se.tasker.dao.repository.TaskRepository;
 import net.kaaass.se.tasker.dto.*;
+import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.ForbiddenException;
+import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
 import net.kaaass.se.tasker.mapper.ProjectMapper;
+import net.kaaass.se.tasker.mapper.ResourceMapper;
 import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
-import net.kaaass.se.tasker.service.EmployeeService;
-import net.kaaass.se.tasker.service.ManagerService;
-import net.kaaass.se.tasker.service.ProjectService;
-import net.kaaass.se.tasker.service.TaskService;
+import net.kaaass.se.tasker.service.*;
 import net.kaaass.se.tasker.vo.ProjectVo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
@@ -60,6 +61,15 @@ public class ProjectServiceImpl implements ProjectService {
 
     @Autowired
     private TaskRepository taskRepository;
+
+    @Autowired
+    private ResourceService resourceService;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
+
+    @Value("${file.templateDocumentPath}")
+    private String templateDocumentPath;
 
     @Override
     public List<ProjectDto> getAll(Pageable pageable) {
@@ -144,9 +154,18 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ResourceDto getOrCreateProjectDocument(ProjectDto projectDto) {
-        // TODO
-        return null;
+    public ResourceDto getOrCreateProjectDocument(ProjectDto projectDto) throws NotFoundException, BadRequestException {
+        var entity = getEntity(projectDto.getId()).orElseThrow(ProjectNotFoundException::new);
+        var doc = entity.getDoc();
+        // 若存在直接返回
+        if (doc != null) {
+            return resourceMapper.entityToDto(doc);
+        }
+        // 若不存在从模板创建一个资源
+        var result = resourceService.createByUrl(templateDocumentPath,
+                ResourceType.DOCUMENT,
+                entity.getUndertaker().getId());
+        return result.orElseThrow();
     }
 
     @Override

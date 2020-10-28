@@ -3,7 +3,9 @@ package net.kaaass.se.tasker.service;
 import net.kaaass.se.tasker.controller.request.GenerateProjectRequest;
 import net.kaaass.se.tasker.dao.entity.ProjectEntity;
 import net.kaaass.se.tasker.dto.*;
+import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.ForbiddenException;
+import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
@@ -36,7 +38,7 @@ public interface ProjectService {
 
     Optional<ProjectEntity> getEntity(String pid);
 
-    ResourceDto getOrCreateProjectDocument(ProjectDto projectDto);
+    ResourceDto getOrCreateProjectDocument(ProjectDto projectDto) throws NotFoundException, BadRequestException;
 
     ProjectEntity checkProjectDone(String pid) throws ProjectNotFoundException;
 
