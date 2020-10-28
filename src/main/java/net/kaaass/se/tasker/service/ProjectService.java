@@ -9,7 +9,6 @@ import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
-import net.kaaass.se.tasker.vo.ProjectVo;
 import org.springframework.data.domain.Pageable;
 
 import java.util.List;
@@ -32,7 +31,7 @@ public interface ProjectService {
 
     List<TaskDto> getProjectTasks(String pid) throws ProjectNotFoundException;
 
-    ProjectVo generateProject(GenerateProjectRequest request);
+    ProjectDto generateProject(GenerateProjectRequest request, String uid) throws NotFoundException;
 
     Optional<ProjectDto> getByPid(String pid);
 

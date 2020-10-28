@@ -1,6 +1,7 @@
 package net.kaaass.se.tasker.service;
 
 import net.kaaass.se.tasker.controller.request.ManagerRequest;
+import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
 import net.kaaass.se.tasker.dao.entity.ManagerEntity;
 import net.kaaass.se.tasker.dto.EmployeeDto;
 import net.kaaass.se.tasker.dto.ManagerDto;
@@ -23,6 +24,8 @@ public interface ManagerService {
     void deleteFromGroup(String mid, String eid) throws ManagerNotFoundException, EmployeeNotFoundException;
 
     List<EmployeeDto> getGroupMember(String mid);
+
+    List<EmployeeEntity> getGroupMemberRaw(String mid);
 
     List<ManagerDto> getAll(Pageable pageable);
 

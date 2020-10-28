@@ -1,13 +1,16 @@
 package net.kaaass.se.tasker.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
+import net.kaaass.se.tasker.TaskerApplication;
 import net.kaaass.se.tasker.controller.request.GenerateProjectRequest;
+import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
 import net.kaaass.se.tasker.dao.entity.ProjectEntity;
 import net.kaaass.se.tasker.dao.entity.TaskEntity;
 import net.kaaass.se.tasker.dao.repository.ManagerRepository;
 import net.kaaass.se.tasker.dao.repository.ProjectRepository;
 import net.kaaass.se.tasker.dao.repository.TaskRepository;
 import net.kaaass.se.tasker.dto.*;
+import net.kaaass.se.tasker.event.ProjectCreateEvent;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.NotFoundException;
@@ -19,16 +22,14 @@ import net.kaaass.se.tasker.mapper.ResourceMapper;
 import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.security.Role;
 import net.kaaass.se.tasker.service.*;
-import net.kaaass.se.tasker.vo.ProjectVo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 /**
@@ -138,9 +139,83 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public ProjectVo generateProject(GenerateProjectRequest request) {
+    @Transactional
+    public ProjectDto generateProject(GenerateProjectRequest request, String uid) throws NotFoundException {
+        var project = new ProjectEntity();
+        var tasks = new ArrayList<TaskEntity>();
+        var rand = new Random();
+        // 创建 tasks
+        for (var type : TaskType.values()) {
+            for (int i = 0; i < request.getTaskCounts().get(type); i++) {
+                var newE = new TaskEntity();
+                newE.setType(type);
+                tasks.add(newE);
+            }
+        }
+        Collections.shuffle(tasks);
+        // 设置项目基本信息
+        var manager = managerRepository.findByUserId(uid).orElseThrow(ManagerNotFoundException::new);
+        project.setName(request.getName());
+        project.setUndertaker(manager);
+        project.setStatus(ProjectStatus.INACTIVE);
+        // 查询可用人员
+        var employeeMap = new HashMap<TaskType, List<EmployeeEntity>>();
+        managerService.getGroupMemberRaw(manager.getId())
+                .forEach(em -> {
+                    var type = em.getType();
+                    if (!employeeMap.containsKey(type)) {
+                        employeeMap.put(type, new ArrayList<>());
+                    }
+                    employeeMap.get(type).add(em);
+                });
+        // 分配人员
+        for (var task : tasks) {
+            var type = task.getType();
+            var employeePool = employeeMap.get(type);
+            if (employeePool.isEmpty()) {
+                throw new NotFoundException(String.format("经理组内没有足够的 %s 类员工！", type.toString()));
+            }
+            // 随机分配一个人
+            var selected = rand.nextInt(employeePool.size());
+            task.setUndertaker(employeePool.get(selected));
+        }
+        // 设置任务基本信息
+        var typeCount = new HashMap<TaskType, Integer>();
         // TODO
-        return null;
+        for (var task : tasks) {
+            var type = task.getType();
+            // 类型计数更新
+            if (!typeCount.containsKey(type)) {
+                typeCount.put(type, 0);
+            }
+            typeCount.put(type, typeCount.get(type) + 1);
+            // 设置信息
+            task.setName(String.format("Task_%s_%d", type.toString(), typeCount.get(type)));
+            task.setStatus(TaskStatus.CREATED);
+        }
+        // 先保存任务，获得id
+        for (int i = 0; i < tasks.size(); i++) {
+            tasks.set(i, taskRepository.save(tasks.get(i)));
+            tasks.get(i).setPrevious(new HashSet<>());
+        }
+        // 创建边依赖关系：前 -> 后
+        int edgeCount = request.getTotal() * 3 / 4;
+        while (edgeCount-- > 0) {
+            int from = rand.nextInt(tasks.size() - 1); // 最后一个必须是终点
+            int to = from + 1 + rand.nextInt(tasks.size() - from - 1);
+            tasks.get(to).getPrevious().add(tasks.get(from));
+        }
+        // 保存项目
+        var result = repository.save(project);
+        // 设置项目、偏序关系，保存任务
+        tasks.forEach(task -> task.setProject(project));
+        var savedTask = taskRepository.saveAll(tasks);
+        result.setTasks(new HashSet<>(savedTask));
+        result = repository.save(result);
+        // 触发事件
+        var resultDto = mapper.entityToDto(result);
+        TaskerApplication.EVENT_BUS.post(new ProjectCreateEvent(resultDto));
+        return resultDto;
     }
 
     @Override

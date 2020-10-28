@@ -2,6 +2,7 @@ package net.kaaass.se.tasker.service.impl;
 
 import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.controller.request.ManagerRequest;
+import net.kaaass.se.tasker.dao.entity.EmployeeEntity;
 import net.kaaass.se.tasker.dao.entity.ManagerEntity;
 import net.kaaass.se.tasker.dao.repository.ManagerRepository;
 import net.kaaass.se.tasker.dto.EmployeeDto;
@@ -79,6 +80,15 @@ public class ManagerServiceImpl implements ManagerService {
                 .stream()
                 .flatMap(Collection::stream)
                 .map(employeeMapper::entityToDto)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<EmployeeEntity> getGroupMemberRaw(String mid) {
+        return getEntity(mid)
+                .map(ManagerEntity::getEmployeeGroup)
+                .stream()
+                .flatMap(Collection::stream)
                 .collect(Collectors.toList());
     }
 

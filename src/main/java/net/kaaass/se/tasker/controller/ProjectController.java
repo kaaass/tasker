@@ -1,9 +1,11 @@
 package net.kaaass.se.tasker.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.controller.request.GenerateProjectRequest;
 import net.kaaass.se.tasker.controller.response.ProjectInfoResponse;
 import net.kaaass.se.tasker.dto.TaskType;
 import net.kaaass.se.tasker.exception.ForbiddenException;
+import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.EmployeeNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ManagerNotFoundException;
 import net.kaaass.se.tasker.exception.concrete.ProjectNotFoundException;
@@ -26,6 +28,7 @@ import java.util.stream.Collectors;
 /**
  * 项目操作相关接口
  */
+@Slf4j
 @RestController
 @RequestMapping("/project")
 public class ProjectController extends BaseController {
@@ -107,7 +110,7 @@ public class ProjectController extends BaseController {
      */
     @PostMapping("/generate")
     @Secured({Role.MANAGER})
-    public ProjectVo generateProject(GenerateProjectRequest request) {
+    public ProjectVo generateProject(@RequestBody GenerateProjectRequest request) throws NotFoundException {
         int randCount = 0;
         int rest = request.getTotal();
         var taskCounts = request.getTaskCounts();
@@ -143,7 +146,8 @@ public class ProjectController extends BaseController {
         request.setTotal(taskCounts.values().stream()
                 .mapToInt(Integer::intValue)
                 .sum());
-        return service.generateProject(request);
+        log.info("开始处理项目创建 {}", request);
+        return mapper.dtoToVo(service.generateProject(request, getUid()));
     }
 
     /**

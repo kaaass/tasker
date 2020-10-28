@@ -1,7 +1,6 @@
 package net.kaaass.se.tasker.controller.request;
 
 import lombok.Data;
-import lombok.NoArgsConstructor;
 import lombok.NonNull;
 import net.kaaass.se.tasker.dto.TaskType;
 
@@ -11,8 +10,10 @@ import java.util.Map;
  * 生成项目信息请求对象
  */
 @Data
-@NoArgsConstructor
 public class GenerateProjectRequest {
+
+    @NonNull
+    String name;
 
     /**
      * 子任务总数
