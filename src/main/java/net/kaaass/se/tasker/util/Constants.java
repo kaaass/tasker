@@ -14,4 +14,6 @@ public class Constants {
     public static final String IMAGE_PATH = "image/";
     public static final String UPLOAD_BASE = "/upload/";
     public static final String DOCUMENT_PATH = "document/";
+
+    public static final String WS_DEFAULT_ROOM = "default";
 }

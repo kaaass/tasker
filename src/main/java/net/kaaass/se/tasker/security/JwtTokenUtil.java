@@ -4,8 +4,10 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 
@@ -33,6 +35,9 @@ public class JwtTokenUtil implements Serializable {
 
     @Value("${jwt.header}")
     private static String tokenHeader;
+
+    @Autowired
+    private UserDetailsService userDetailsService;
 
     /**
      * 从令牌获得用户名（即用户 uid）
@@ -133,6 +138,17 @@ public class JwtTokenUtil implements Serializable {
         return getUsernameFromToken(token)
                 .map(username -> username.equals(user.getUsername()) && !isTokenExpired(token))
                 .orElse(false);
+    }
+
+    /**
+     * 校验令牌是否合法
+     */
+    public boolean validateToken(String token) {
+        var username = getUsernameFromToken(token);
+        if (username.isEmpty())
+            return false;
+        var userDetails = this.userDetailsService.loadUserByUsername(username.get());
+        return validateToken(token, userDetails);
     }
 
     /**
