@@ -74,7 +74,7 @@ public class MessageEventHandler {
         for (var taskDto : tasks) {
             var message = new TaskStartMessage();
             message.setTask(taskMapper.dtoToVo(taskDto));
-            message.setUndertaker(message.getTask().getUndertaker());
+            message.setUndertakerEid(message.getTask().getUndertaker().getId());
             broadcast(MessageConstants.TASK_START, message);
         }
     }

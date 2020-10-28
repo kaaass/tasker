@@ -12,5 +12,5 @@ public class TaskStartMessage {
 
     private TaskVo task;
 
-    private EmployeeVo undertaker;
+    private String undertakerEid;
 }
