@@ -6,10 +6,12 @@ import com.corundumstudio.socketio.annotation.OnConnect;
 import com.corundumstudio.socketio.annotation.OnDisconnect;
 import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.TaskerApplication;
+import net.kaaass.se.tasker.event.TaskStartEvent;
 import net.kaaass.se.tasker.event.TestEvent;
 import net.kaaass.se.tasker.eventhandle.SubscribeEvent;
+import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.util.Constants;
-import org.springframework.beans.factory.annotation.Autowired;
+import net.kaaass.se.tasker.websocket.message.TaskStartMessage;
 import org.springframework.stereotype.Component;
 
 /**
@@ -21,8 +23,11 @@ public class MessageEventHandler {
 
     private final SocketIOServer server;
 
-    public MessageEventHandler(SocketIOServer server) {
+    private final TaskMapper taskMapper;
+
+    public MessageEventHandler(SocketIOServer server, TaskMapper taskMapper) {
         this.server = server;
+        this.taskMapper = taskMapper;
         // 注册监听器
         TaskerApplication.EVENT_BUS.register(this);
     }
@@ -52,8 +57,25 @@ public class MessageEventHandler {
         server.getRoomOperations(Constants.WS_DEFAULT_ROOM).sendEvent(name, data);
     }
 
+    /**
+     * 测试消息
+     */
     @SubscribeEvent
     public void handleTest(TestEvent event) {
-        broadcast("test", event);
+        broadcast(MessageConstants.TEST, event);
+    }
+
+    /**
+     * 任务开始消息
+     */
+    @SubscribeEvent
+    public void handleTaskStart(TaskStartEvent event) {
+        var tasks = event.getStarts();
+        for (var taskDto : tasks) {
+            var message = new TaskStartMessage();
+            message.setTask(taskMapper.dtoToVo(taskDto));
+            message.setUndertaker(message.getTask().getUndertaker());
+            broadcast(MessageConstants.TASK_START, message);
+        }
     }
 }
