@@ -20,8 +20,13 @@ public interface UserMapper {
     @Mapping(source = "roles", target = "roles", qualifiedByName = "mapRoles")
     UserDto entityToDto(UserEntity authEntity);
 
-    @Mapping(target = "uid")
-    EmployeeRequest mapEmployeeRequest(UserRegisterRequest registerRequest);
+    default EmployeeRequest mapEmployeeRequest(UserRegisterRequest registerRequest) {
+        return new EmployeeRequest(
+                registerRequest.getName(),
+                registerRequest.getType());
+    }
 
-    UserRequest mapUserRequest(UserRegisterRequest registerRequest);
+    default UserRequest mapUserRequest(UserRegisterRequest registerRequest) {
+        return new UserRequest(registerRequest.getUsername());
+    }
 }
