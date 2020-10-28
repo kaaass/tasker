@@ -167,6 +167,7 @@ public class TaskServiceImpl implements TaskService {
         entity.setStatus(TaskStatus.WAIT_COMMIT);
         // 获得项目文档路径
         var result = projectService.getOrCreateProjectDocument(projectMapper.entityToDto(entity.getProject()));
+        // FIXME 此处错误不会回滚
         // 保存
         repository.save(entity);
         return result;
@@ -321,7 +322,7 @@ public class TaskServiceImpl implements TaskService {
             var employee = employeeRepository.findByUserId(userDto.getId())
                     .orElseThrow(EmployeeNotFoundException::new);
             if (!repository.existsByIdAndUndertaker(tid, employee)) {
-                throw new ForbiddenException("无权查看此任务！");
+                throw new ForbiddenException("无权查看、操作此任务！");
             }
         }
     }

@@ -88,7 +88,8 @@ public class TaskController extends BaseController {
     @PostMapping("/{tid}/commit")
     @Secured({Role.EMPLOYEE})
     public TaskVo commitTask(@PathVariable String tid,
-                             @RequestParam String documentId) throws NotFoundException, BadRequestException {
+                             @RequestParam String documentId) throws NotFoundException, BadRequestException, ForbiddenException {
+        service.checkViewPermit(tid, getUserDto());
         return mapper.dtoToVo(service.commitTask(tid, documentId));
     }
 
@@ -101,7 +102,8 @@ public class TaskController extends BaseController {
      */
     @PostMapping("/{tid}/finish")
     @Secured({Role.EMPLOYEE})
-    public ResourceVo finishTask(@PathVariable String tid) throws BadRequestException, NotFoundException {
+    public ResourceVo finishTask(@PathVariable String tid) throws BadRequestException, NotFoundException, ForbiddenException {
+        service.checkViewPermit(tid, getUserDto());
         return resourceMapper.dtoToVo(service.finishTask(tid));
     }
 
@@ -110,7 +112,8 @@ public class TaskController extends BaseController {
      */
     @PostMapping("/{tid}/confirm")
     @Secured({Role.MANAGER})
-    public TaskVo confirmTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException, ProjectNotFoundException {
+    public TaskVo confirmTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException, ProjectNotFoundException, ForbiddenException, EmployeeNotFoundException {
+        service.checkViewPermit(tid, getUserDto());
         return mapper.dtoToVo(service.confirmTask(tid));
     }
 
@@ -119,7 +122,8 @@ public class TaskController extends BaseController {
      */
     @PostMapping("/{tid}/reject")
     @Secured({Role.MANAGER})
-    public TaskVo rejectTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException {
+    public TaskVo rejectTask(@PathVariable String tid) throws BadRequestException, TaskNotFoundException, ForbiddenException, EmployeeNotFoundException {
+        service.checkViewPermit(tid, getUserDto());
         return mapper.dtoToVo(service.rejectTask(tid));
     }
 
@@ -129,7 +133,8 @@ public class TaskController extends BaseController {
     @PostMapping("/{tid}/delegate")
     @Secured({Role.EMPLOYEE})
     public DelegateVo delegateTask(@PathVariable String tid,
-                                   @RequestBody DelegateRequest request) throws EmployeeNotFoundException, TaskNotFoundException {
+                                   @RequestBody DelegateRequest request) throws EmployeeNotFoundException, TaskNotFoundException, ForbiddenException {
+        service.checkViewPermit(tid, getUserDto());
         return mapper.dtoToVo(service.addDelegate(tid, request, getUid()));
     }
 
@@ -138,7 +143,8 @@ public class TaskController extends BaseController {
      */
     @PostMapping("/{tid}/withdraw")
     @Secured({Role.EMPLOYEE})
-    public TaskVo withdrawDelegate(@PathVariable String tid) throws NotFoundException {
+    public TaskVo withdrawDelegate(@PathVariable String tid) throws NotFoundException, ForbiddenException {
+        service.checkViewPermit(tid, getUserDto());
         return mapper.dtoToVo(service.withdrawDelegate(tid));
     }
 }

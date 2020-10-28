@@ -25,7 +25,6 @@ import net.kaaass.se.tasker.service.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.parameters.P;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -238,7 +237,7 @@ public class ProjectServiceImpl implements ProjectService {
         // 若不存在从模板创建一个资源
         var result = resourceService.createByUrl(templateDocumentPath,
                 ResourceType.DOCUMENT,
-                entity.getUndertaker().getId());
+                entity.getUndertaker().getUser().getId());
         return result.orElseThrow();
     }
 
