@@ -93,7 +93,9 @@ public class UserServiceImpl implements UserService {
     public UserDto update(String uid, UserRequest request) throws NotFoundException {
         var entity = getEntity(uid).orElseThrow(UserNotFoundException::new);
         entity.setUsername(request.getUsername());
-        entity.setPassword(jwtTokenUtil.encryptPassword(request.getPassword()));
+        if (request.getPassword() != null) {
+            entity.setPassword(jwtTokenUtil.encryptPassword(request.getPassword()));
+        }
         if (request.getAvatarId() != null) {
             var resource = resourceService.getEntity(request.getAvatarId())
                     .orElseThrow(() -> new NotFoundException("资源文件不存在！"));

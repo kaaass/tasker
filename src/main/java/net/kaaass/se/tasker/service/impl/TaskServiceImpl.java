@@ -28,6 +28,7 @@ import net.kaaass.se.tasker.service.ProjectService;
 import net.kaaass.se.tasker.service.ResourceService;
 import net.kaaass.se.tasker.service.TaskService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import javax.transaction.Transactional;
@@ -96,6 +97,31 @@ public class TaskServiceImpl implements TaskService {
                 .orElseThrow(EmployeeNotFoundException::new);
         if (entity.getType() != undertaker.getType()) {
             throw new BadRequestException("员工类型与任务类型不同，无法更新！");
+        }
+        // 建边图
+        var edges = new ArrayList<Pair<String, String>>(); // prev -> cur
+        var tasks = projectService.getProjectTasks(entity.getProject().getId());
+        for (var task : tasks) {
+            if (task.getId().equals(tid)) // 忽略当前
+                continue;
+            task.getPrevious().forEach(prev -> edges.add(Pair.of(prev.getId(), task.getId())));
+        }
+        request.getPreviousId().forEach(prev -> edges.add(Pair.of(prev, tid)));
+        // 拓扑排序判环
+        boolean delete;
+        var inDegree = new HashMap<String, Integer>();
+        do {
+            // 求入度
+            inDegree.clear();
+            edges.forEach(edge -> {
+                var org = inDegree.computeIfAbsent(edge.getSecond(), s -> 0);
+                inDegree.put(edge.getSecond(), org + 1);
+            });
+            // 删点，因为入度为 0 因此只有出边
+            delete = edges.removeIf(edge -> inDegree.computeIfAbsent(edge.getFirst(), s -> 0) == 0);
+        } while (delete && !edges.isEmpty());
+        if (!edges.isEmpty()) {
+            throw new BadRequestException("任务依赖不能出现环！");
         }
         // 保存
         return saveBaseOnEntity(request, entity);
@@ -294,6 +320,10 @@ public class TaskServiceImpl implements TaskService {
         // 不能委派给自己
         if (delegateTo.getId() == me.getId()) {
             throw new BadRequestException("不能委派给自己！");
+        }
+        // 检查任务类型
+        if (entity.getType() == delegateTo.getType()) {
+            throw new BadRequestException("委派对象任务类型不正确！");
         }
         // 创建
         delegate.setTask(entity);

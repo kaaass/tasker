@@ -20,4 +20,10 @@ public class EmployeeVo {
     private ManagerVo manager;
 
     private boolean deleted;
+
+    public String getName() {
+        if (deleted)
+            return "用户已删除";
+        return this.name;
+    }
 }
