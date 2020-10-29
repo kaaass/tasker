@@ -21,7 +21,7 @@ import java.util.Optional;
  */
 public interface ManagerService {
 
-    Optional<EmployeeDto> addToGroup(String mid, String eid) throws ManagerNotFoundException, EmployeeNotFoundException;
+    Optional<EmployeeDto> addToGroup(String mid, String eid) throws ManagerNotFoundException, EmployeeNotFoundException, BadRequestException;
 
     void deleteFromGroup(String mid, String eid) throws ManagerNotFoundException, EmployeeNotFoundException;
 

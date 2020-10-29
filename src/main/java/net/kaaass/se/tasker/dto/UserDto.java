@@ -2,6 +2,7 @@ package net.kaaass.se.tasker.dto;
 
 import lombok.Data;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -21,4 +22,6 @@ public class UserDto {
     boolean enable = true;
 
     private ResourceDto avatar;
+
+    private Date lastLoginTime;
 }

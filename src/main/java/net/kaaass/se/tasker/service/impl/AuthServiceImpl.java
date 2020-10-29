@@ -8,10 +8,12 @@ import net.kaaass.se.tasker.dao.entity.UserEntity;
 import net.kaaass.se.tasker.dao.repository.UserAuthRepository;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
 import net.kaaass.se.tasker.dto.UserDto;
+import net.kaaass.se.tasker.event.UserLoginEvent;
 import net.kaaass.se.tasker.event.UserRegisterEvent;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.ServiceUnavailableException;
+import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
 import net.kaaass.se.tasker.service.AuthService;
@@ -113,7 +115,9 @@ public class AuthServiceImpl implements AuthService {
                         userAuthEntity.setLastLoginTime(Timestamp.valueOf(LocalDateTime.now()));
                         repository.save(userAuthEntity);
                     });
-
+            // 触发登录事件
+            var user = userService.getByUid(uid).orElseThrow(UserNotFoundException::new);
+            TaskerApplication.EVENT_BUS.post(new UserLoginEvent(user));
             // 拼接凭据
             return Optional.of(userDetails)
                     .map(jwtUser -> {
@@ -127,7 +131,7 @@ public class AuthServiceImpl implements AuthService {
         } catch (AuthenticationException e) {
             log.info("登录失败", e);
             return Optional.empty();
-        } catch (NoSuchElementException e) {
+        } catch (NoSuchElementException | UserNotFoundException e) {
             log.info("账户 {} 不存在", username);
             return Optional.empty();
         }

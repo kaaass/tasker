@@ -8,6 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.TaskerApplication;
 import net.kaaass.se.tasker.event.TaskStartEvent;
 import net.kaaass.se.tasker.event.TestEvent;
+import net.kaaass.se.tasker.event.UserLoginEvent;
 import net.kaaass.se.tasker.eventhandle.SubscribeEvent;
 import net.kaaass.se.tasker.mapper.TaskMapper;
 import net.kaaass.se.tasker.util.Constants;
@@ -77,5 +78,13 @@ public class MessageEventHandler {
             message.setUndertakerEid(message.getTask().getUndertaker().getId());
             broadcast(MessageConstants.TASK_START, message);
         }
+    }
+
+    /**
+     * 广播登录
+     */
+    @SubscribeEvent
+    public void handleLogin(UserLoginEvent event) {
+        broadcast(MessageConstants.LOGIN, event.getUser());
     }
 }

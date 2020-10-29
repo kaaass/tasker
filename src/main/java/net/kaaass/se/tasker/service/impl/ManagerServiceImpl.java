@@ -60,9 +60,13 @@ public class ManagerServiceImpl implements ManagerService {
 
     @Override
     public Optional<EmployeeDto> addToGroup(String mid, String eid)
-            throws ManagerNotFoundException, EmployeeNotFoundException {
+            throws ManagerNotFoundException, EmployeeNotFoundException, BadRequestException {
         var manager = getEntity(mid).orElseThrow(ManagerNotFoundException::new);
         var employee = employeeService.getEntity(eid).orElseThrow(EmployeeNotFoundException::new);
+        // 检查员工是否已经有经理
+        if (employee.getManager() != null) {
+            throw new BadRequestException("员工已经属于某经理管理，请先联系该经理移出该员工！");
+        }
         // 增加员工
         var group = manager.getEmployeeGroup();
         group.add(employee);

@@ -50,7 +50,7 @@ public class ManagerController extends BaseController {
     @PostMapping("/{mid}/employee/add")
     @Secured({Role.ADMIN, Role.MANAGER})
     public EmployeeVo addEmployee(@PathVariable String mid,
-                                  @RequestParam String eid) throws EmployeeNotFoundException, ManagerNotFoundException {
+                                  @RequestParam String eid) throws EmployeeNotFoundException, ManagerNotFoundException, BadRequestException {
         return service.addToGroup(mid, eid)
                 .map(employeeMapper::dtoToVo)
                 .orElseThrow();

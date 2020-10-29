@@ -4,6 +4,8 @@ import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import net.kaaass.se.tasker.dto.AuthTokenDto;
+import net.kaaass.se.tasker.service.AuthService;
+import net.kaaass.se.tasker.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -38,6 +40,9 @@ public class JwtTokenUtil implements Serializable {
 
     @Autowired
     private UserDetailsService userDetailsService;
+
+    @Autowired
+    private UserService userService;
 
     /**
      * 从令牌获得用户名（即用户 uid）
@@ -124,7 +129,8 @@ public class JwtTokenUtil implements Serializable {
     public Optional<AuthTokenDto> refreshToken(String token) {
         return getClaimsFromToken(token)
                 .map(claims -> {
-                    claims.put(CLAIM_KEY_CREATED, new Date());
+                    // 签发 token 在 30s 以后，以防止时间不一致
+                    claims.put(CLAIM_KEY_CREATED, new Date(new Date().getTime() + 30));
                     return claims;
                 })
                 .map(this::generateToken);
@@ -135,8 +141,17 @@ public class JwtTokenUtil implements Serializable {
      */
     public boolean validateToken(String token, UserDetails userDetails) {
         var user = (JwtUser) userDetails;
-        return getUsernameFromToken(token)
-                .map(username -> username.equals(user.getUsername()) && !isTokenExpired(token))
+        var uid = userDetails.getUsername();
+        var opt = userService.getByUid(uid);
+        if (opt.isEmpty()) {
+            return false;
+        }
+        var userDto = opt.get();
+        return getClaimsFromToken(token)
+                .map(claim -> claim.get(CLAIM_KEY_USERNAME, String.class).equals(user.getUsername())
+                        && !isTokenExpired(token)
+                        // 用户最后登录时间要比令牌签发时间早
+                        && userDto.getLastLoginTime().before(claim.get(CLAIM_KEY_CREATED, Date.class)))
                 .orElse(false);
     }
 
