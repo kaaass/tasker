@@ -22,4 +22,8 @@ public class ResourceVo {
 
     @JsonSerialize(using = DateToLongSerializer.class)
     private Date uploadTime;
+
+    public String getUrl() {
+        return "/api" + url;
+    }
 }

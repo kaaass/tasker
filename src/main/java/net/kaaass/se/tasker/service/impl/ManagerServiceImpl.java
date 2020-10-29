@@ -24,6 +24,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import javax.transaction.Transactional;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -136,6 +137,7 @@ public class ManagerServiceImpl implements ManagerService {
         try {
             result = repository.saveAndFlush(entity);
         } catch (Exception e) {
+            log.info("用户已经存在经理记录", e);
             throw new BadRequestException("用户已经存在经理记录！");
         }
         return mapper.entityToDto(result);
@@ -164,5 +166,6 @@ public class ManagerServiceImpl implements ManagerService {
     public void deleteManager(String mid) throws ManagerNotFoundException {
         var entity = getEntity(mid).orElseThrow(ManagerNotFoundException::new);
         entity.setDeleted(true);
+        repository.saveAndFlush(entity);
     }
 }
