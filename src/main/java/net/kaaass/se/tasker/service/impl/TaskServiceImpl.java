@@ -327,7 +327,7 @@ public class TaskServiceImpl implements TaskService {
             throw new BadRequestException("不能委派给自己！");
         }
         // 检查任务类型
-        if (entity.getType() == delegateTo.getType()) {
+        if (entity.getType() != delegateTo.getType()) {
             throw new BadRequestException("委派对象任务类型不正确！");
         }
         // 创建

@@ -129,8 +129,8 @@ public class JwtTokenUtil implements Serializable {
     public Optional<AuthTokenDto> refreshToken(String token) {
         return getClaimsFromToken(token)
                 .map(claims -> {
-                    // 签发 token 在 30s 以后，以防止时间不一致
-                    claims.put(CLAIM_KEY_CREATED, new Date(new Date().getTime() + 30));
+                    // 签发 token 在 10s 以后，以防止时间不一致
+                    claims.put(CLAIM_KEY_CREATED, new Date(new Date().getTime() + 10));
                     return claims;
                 })
                 .map(this::generateToken);
