@@ -48,11 +48,11 @@ public interface UserService {
     /**
      * 更新用户信息
      */
-    UserDto update(String uid, UserRequest request) throws UserNotFoundException;
+    UserDto update(String uid, UserRequest request) throws NotFoundException;
 
     /**
      * 创建用户
      * @return
      */
-    Optional<UserDto> add(UserRequest request);
+    Optional<UserDto> add(UserRequest request) throws NotFoundException;
 }

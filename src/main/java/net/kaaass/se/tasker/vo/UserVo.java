@@ -14,4 +14,6 @@ public class UserVo {
     private String username;
 
     private List<String> roles;
+
+    private ResourceVo avatar;
 }

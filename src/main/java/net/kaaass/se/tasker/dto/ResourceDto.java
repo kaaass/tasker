@@ -17,7 +17,7 @@ public class ResourceDto {
 
     private String url;
 
-    private UserDto uploader;
+    private String uploaderUid;
 
     @JsonSerialize(using = DateToLongSerializer.class)
     private Date uploadTime;

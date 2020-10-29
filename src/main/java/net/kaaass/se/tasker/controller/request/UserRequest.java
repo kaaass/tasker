@@ -19,4 +19,7 @@ public class UserRequest {
 
     @Nullable
     private String password;
+
+    @Nullable
+    private String avatarId;
 }

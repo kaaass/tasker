@@ -19,4 +19,6 @@ public class UserDto {
     private List<String> roles;
 
     boolean enable = true;
+
+    private ResourceDto avatar;
 }

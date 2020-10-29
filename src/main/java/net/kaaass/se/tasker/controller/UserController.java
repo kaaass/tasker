@@ -36,7 +36,7 @@ public class UserController extends BaseController {
      */
     @PostMapping("/{uid}/update")
     @Secured({Role.ADMIN, Role.MANAGER, Role.EMPLOYEE})
-    public UserVo updateUser(@PathVariable String uid, @RequestBody UserRequest request) throws UserNotFoundException {
+    public UserVo updateUser(@PathVariable String uid, @RequestBody UserRequest request) throws NotFoundException {
         return mapper.dtoToVo(service.update(uid, request));
     }
 
@@ -67,7 +67,7 @@ public class UserController extends BaseController {
      */
     @PostMapping("/")
     @PreAuthorize("hasRole('ADMIN')")
-    public UserVo addUser(@RequestBody UserRequest request) throws BadRequestException {
+    public UserVo addUser(@RequestBody UserRequest request) throws BadRequestException, NotFoundException {
         return service.add(request)
                 .map(mapper::dtoToVo)
                 .orElseThrow(() -> new BadRequestException("该用户名已被注册！"));

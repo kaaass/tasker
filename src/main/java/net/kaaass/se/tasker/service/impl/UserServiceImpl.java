@@ -7,9 +7,11 @@ import net.kaaass.se.tasker.dao.repository.UserAuthRepository;
 import net.kaaass.se.tasker.dto.UserDto;
 import net.kaaass.se.tasker.exception.NotFoundException;
 import net.kaaass.se.tasker.exception.concrete.UserNotFoundException;
+import net.kaaass.se.tasker.mapper.ResourceMapper;
 import net.kaaass.se.tasker.mapper.UserMapper;
 import net.kaaass.se.tasker.security.JwtTokenUtil;
 import net.kaaass.se.tasker.security.Role;
+import net.kaaass.se.tasker.service.ResourceService;
 import net.kaaass.se.tasker.service.UserService;
 import org.mapstruct.ap.internal.util.Collections;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,12 @@ public class UserServiceImpl implements UserService {
 
     @Autowired
     private UserMapper mapper;
+
+    @Autowired
+    private ResourceService resourceService;
+
+    @Autowired
+    private ResourceMapper resourceMapper;
 
     @Override
     public Optional<UserDto> getByUid(String uid) {
@@ -82,20 +90,30 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public UserDto update(String uid, UserRequest request) throws UserNotFoundException {
+    public UserDto update(String uid, UserRequest request) throws NotFoundException {
         var entity = getEntity(uid).orElseThrow(UserNotFoundException::new);
         entity.setUsername(request.getUsername());
         entity.setPassword(jwtTokenUtil.encryptPassword(request.getPassword()));
+        if (request.getAvatarId() != null) {
+            var resource = resourceService.getEntity(request.getAvatarId())
+                    .orElseThrow(() -> new NotFoundException("资源文件不存在！"));
+            entity.setAvatar(resource);
+        }
         var result = repository.save(entity);
         return mapper.entityToDto(result);
     }
 
     @Override
-    public Optional<UserDto> add(UserRequest request) {
+    public Optional<UserDto> add(UserRequest request) throws NotFoundException {
         var entity = new UserEntity();
         entity.setUsername(request.getUsername());
         entity.setPassword(jwtTokenUtil.encryptPassword(request.getPassword()));
         entity.setRoles(Role.USER);
+        if (request.getAvatarId() != null) {
+            var resource = resourceService.getEntity(request.getAvatarId())
+                    .orElseThrow(() -> new NotFoundException("资源文件不存在！"));
+            entity.setAvatar(resource);
+        }
         try {
             entity = repository.saveAndFlush(entity);
         } catch (Exception e) {

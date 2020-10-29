@@ -54,6 +54,10 @@ public class UserEntity {
             columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Timestamp lastLoginTime;
 
+    @ManyToOne
+    @JoinColumn(name = "avatar_rid")
+    private ResourceEntity avatar;
+
     /*
      * 外键相关
      */
