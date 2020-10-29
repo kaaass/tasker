@@ -2,6 +2,7 @@ package net.kaaass.se.tasker.service;
 
 import net.kaaass.se.tasker.controller.request.DelegateRequest;
 import net.kaaass.se.tasker.controller.request.TaskRequest;
+import net.kaaass.se.tasker.controller.response.StatResponse;
 import net.kaaass.se.tasker.dao.entity.TaskEntity;
 import net.kaaass.se.tasker.dto.DelegateDto;
 import net.kaaass.se.tasker.dto.ResourceDto;
@@ -64,4 +65,6 @@ public interface TaskService {
     TaskDto withdrawDelegate(String tid) throws NotFoundException;
 
     void checkViewPermit(String tid, UserDto userDto) throws EmployeeNotFoundException, ForbiddenException;
+
+    StatResponse stat();
 }

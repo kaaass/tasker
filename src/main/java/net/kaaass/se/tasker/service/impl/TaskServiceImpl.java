@@ -4,10 +4,12 @@ import lombok.extern.slf4j.Slf4j;
 import net.kaaass.se.tasker.TaskerApplication;
 import net.kaaass.se.tasker.controller.request.DelegateRequest;
 import net.kaaass.se.tasker.controller.request.TaskRequest;
+import net.kaaass.se.tasker.controller.response.StatResponse;
 import net.kaaass.se.tasker.dao.entity.DelegateEntity;
 import net.kaaass.se.tasker.dao.entity.TaskEntity;
 import net.kaaass.se.tasker.dao.repository.DelegateRepository;
 import net.kaaass.se.tasker.dao.repository.EmployeeRepository;
+import net.kaaass.se.tasker.dao.repository.ProjectRepository;
 import net.kaaass.se.tasker.dao.repository.TaskRepository;
 import net.kaaass.se.tasker.dto.*;
 import net.kaaass.se.tasker.event.TaskFinishEvent;
@@ -73,6 +75,9 @@ public class TaskServiceImpl implements TaskService {
 
     @Autowired
     private ResourceMapper resourceMapper;
+
+    @Autowired
+    private ProjectRepository projectRepository;
 
     @Override
     public void checkDelegateExpire() {
@@ -381,5 +386,35 @@ public class TaskServiceImpl implements TaskService {
                 }
             }
         }
+    }
+
+    @Override
+    public StatResponse stat() {
+        var project = new HashMap<ProjectStatus, Double>();
+        var task = new HashMap<TaskStatus, Double>();
+        var ret = new StatResponse(project, task);
+        // 查询项目
+        double total = 0;
+        for (var status : ProjectStatus.values()) {
+            long cur = projectRepository.countAllByStatus(status);
+            project.put(status, (double) cur);
+            total += cur;
+        }
+        // 归一化
+        for (var status : ProjectStatus.values()) {
+            project.put(status, project.get(status) / total);
+        }
+        // 查询任务
+        total = 0;
+        for (var status : TaskStatus.values()) {
+            long cur = repository.countAllByStatus(status);
+            task.put(status, (double) cur);
+            total += cur;
+        }
+        // 归一化
+        for (var status : TaskStatus.values()) {
+            task.put(status, task.get(status) / total);
+        }
+        return ret;
     }
 }

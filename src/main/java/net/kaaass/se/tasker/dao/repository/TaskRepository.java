@@ -16,4 +16,6 @@ public interface TaskRepository extends JpaRepository<TaskEntity, String> {
     boolean existsByProjectAndStatusIsNot(ProjectEntity project, TaskStatus status);
 
     boolean existsByIdAndUndertaker(String tid, EmployeeEntity employee);
+
+    long countAllByStatus(TaskStatus status);
 }

@@ -2,6 +2,7 @@ package net.kaaass.se.tasker.controller;
 
 import net.kaaass.se.tasker.controller.request.DelegateRequest;
 import net.kaaass.se.tasker.controller.request.TaskRequest;
+import net.kaaass.se.tasker.controller.response.StatResponse;
 import net.kaaass.se.tasker.exception.BadRequestException;
 import net.kaaass.se.tasker.exception.ForbiddenException;
 import net.kaaass.se.tasker.exception.NotFoundException;
@@ -146,5 +147,10 @@ public class TaskController extends BaseController {
     public TaskVo withdrawDelegate(@PathVariable String tid) throws NotFoundException, ForbiddenException {
         service.checkViewPermit(tid, getUserDto());
         return mapper.dtoToVo(service.withdrawDelegate(tid));
+    }
+
+    @GetMapping("/stat")
+    public StatResponse stat() {
+        return service.stat();
     }
 }
