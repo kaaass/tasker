@@ -11,6 +11,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
+import javax.transaction.Transactional;
 import java.util.List;
 
 import static org.junit.Assert.*;
@@ -29,6 +30,7 @@ public class TestAuthService {
     private PasswordEncoder passwordEncoder;
 
     @SneakyThrows
+    @Transactional
     @Test
     public void testRegisterAndRemove() {
         var request = new UserRegisterRequest(
@@ -52,6 +54,7 @@ public class TestAuthService {
     }
 
     @SneakyThrows
+    @Transactional
     @Test
     public void testLogin() {
         var request = new UserRegisterRequest(
@@ -67,7 +70,7 @@ public class TestAuthService {
         assertTrue(logged.isPresent());
         var response = logged.get();
         assertEquals("kas", response.getUsername());
-        assertEquals(List.of(Role.USER), response.getRoles());
+        assertEquals(List.of(Role.USER, Role.EMPLOYEE), response.getRoles());
         // end
         userService.remove(user.getId());
     }
